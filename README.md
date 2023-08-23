@@ -11,7 +11,7 @@ A repository for All Types of Implementation Tests
 - Spring Batch Job, Akka Actor 를 이용하여 주기적으로 MQTT를 이용해 백엔드로 주기적 전송/파싱 -> DB 저장
 - Frontend로 넘길 Rest API 작성
 - Frontend에서 Rest API로 데이터를 떙겨와 Time Graph에 데이터를 넘긴다.
-- 감시자(Watcher)가 Rest API에서 데이터를 가져오는 함수를 감시하며 새로운 데이터가 Fetch 될 시 차트를 업데이터 한다
+- 감시자(Watcher)가 Rest API에서 데이터를 가져오는 함수를 감시하며 새로운 데이터가 Fetch 될 시 차트의 데이터 업데이트
 - 데이터를 넘기면서 Reactive하게 실시간으로 차트의 x,y축이 변동되고 바로 적용되어야 함
 
 <br>
