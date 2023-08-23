@@ -5,7 +5,7 @@ A repository for All Types of Implementation Tests
 
 ---
 
-## 1. 실시간 반응형 통계 데이터 시각화
+## 1. 실시간 반응형 통계 데이터 시각화 (진행 중)
 
 - 특정 솔루션에서 나온 이벤트 데이터가 나온다. (Json, CSV 등등)
 - Spring Batch, Akka Actor 를 이용하여 주기적으로 MQTT를 이용해 백엔드로 전송 or 파싱 -> DB 저장
