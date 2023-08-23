@@ -2,7 +2,7 @@ import { createRouter, createWebHistory } from 'vue-router'
 import RequestBackend from '../components/RequestBackend.vue'
 import StreamingHls from '../components/StreamingHls.vue'
 import TimeGraph from '../components/TimeGraph.vue'
-import DummyChart from '../components/DummyChart.vue'
+import DummyChart from '../components/TimeGraph.vue'
 
 const routes = [
   {
