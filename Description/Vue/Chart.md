@@ -147,7 +147,7 @@ public class Parser {
 
 ---
 
-## Vue Chart로 정적인 차트 구현
+## Vue Chart로 정적인 샘플 차트 구현
 
 **Vue-Chart-3 공식문서 보고 구현하기**
 
@@ -278,7 +278,7 @@ Chart.js `chartInstance`및 를 `canvasRef`사용하여 구성 요소의 참�
 
 ## Scatter Chart 구현
 
-**여기서 부터 차트를 Scatter Chart로 변경합니다.**
+**여기서 부터 차트를 Scatter Chart로 변경하고, 위의 샘플 차트를 모두 지우고 새로 만들겠습니다.**
 
 날짜 관련 데이터를 출력하려면 라이브러리를 설치해야 합니다.
 
@@ -311,7 +311,6 @@ v-if를 통해 차트가 렌더링 되기 전 데이터가 들어오지 않는�
   <div>  
     <h2 align="center">Scatter Chart</h2>  
     <ScatterChart v-if="frameData && frameData.length" ref="scatterRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />  
-    <button @click="shuffleData">Shuffle</button>  
   </div>  
 </template>  
 ```
@@ -326,32 +325,6 @@ v-if를 통해 차트가 렌더링 되기 전 데이터가 들어오지 않는�
 - 그리고 감시자(Watcher)를 사용 해 Backend에서 들어오는 데이터가 업데이트 된다면 차트를 업데이트 하도록 포인팅 해주었습니다.
 
 <br>
-
-```ts
-const groupedByMinutes = computed(() =>  
-    groupBy(frameData.value, (data) => moment(data.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes())  
-);  
-  
-const aggregatedData = computed(() => {  
-  return Object.entries(groupedByMinutes.value).map(([minute, dataGroup]) => {  
-    return {  
-      x: parseInt(minute),  
-      y: sumBy(dataGroup, 'count')  
-    };  
-  });  
-});  
-  
-// Chart Data  
-const testData = computed(() => ({  
-  labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],  
-  datasets: [  
-    {  
-      data: aggregatedData.value,  
-      backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],  
-    },  
-  ],  
-}));
-```
 
 ```ts
 <script lang="ts" setup>  
@@ -373,7 +346,6 @@ interface FrameData {
   systemTimestamp: number;  
 }  
   
-const data = ref<number[]>([30, 40, 60, 70, 5]);  
 const scatterRef = ref<InstanceType<typeof ScatterChart> | null>(null);  
 const frameData = ref<FrameData[]>([]);  
   
@@ -428,11 +400,6 @@ const options = ref({
   }  
 });  
   
-// Shuffle  
-const shuffleData = () => {  
-  data.value = shuffle(data.value);  
-};  
-  
 // Rest API에서 데이터 받아오기  
 const setData = async () => {  
   try {  
@@ -484,6 +451,32 @@ data: frameData.value.map(frame => ({ x : moment(frame.systemDate, 'EEE MMM dd H
 동일한 "분"의 여러 데이터 포인트를 합산하려면aus '분' 값을 직접 사용해야 합니다.
 
 제 코드에서는 중복값과 Count의 값을 합산하지는 않을 것이지만 그룹화 하는 코드만 적어보겠습니다.
+
+```ts
+const groupedByMinutes = computed(() =>  
+    groupBy(frameData.value, (data) => moment(data.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes())  
+);  
+  
+const aggregatedData = computed(() => {  
+  return Object.entries(groupedByMinutes.value).map(([minute, dataGroup]) => {  
+    return {  
+      x: parseInt(minute),  
+      y: sumBy(dataGroup, 'count')  
+    };  
+  });  
+});  
+  
+// Chart Data  
+const testData = computed(() => ({  
+  labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],  
+  datasets: [  
+    {  
+      data: aggregatedData.value,  
+      backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],  
+    },  
+  ],  
+}));
+```
 
 <br>
 
