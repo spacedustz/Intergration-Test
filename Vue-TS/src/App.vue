@@ -1,19 +1,19 @@
 <template>
-  <p>================================================</p>
-  <div>
-    <router-link to="/json">Request Backend Json</router-link>
-  </div>
+<!--  <p>================================================</p>-->
+<!--  <div>-->
+<!--    <router-link to="/json">Request Backend Json</router-link>-->
+<!--  </div>-->
+
+<!--  <div>-->
+<!--    <router-link to="/video">Streaming HLS</router-link>-->
+<!--  </div>-->
+
+<!--  <div>-->
+<!--    <router-link to="/graph">Time Graph</router-link>-->
+<!--  </div>-->
 
   <div>
-    <router-link to="/video">Streaming HLS</router-link>
-  </div>
-
-  <div>
-    <router-link to="/graph">Time Graph</router-link>
-  </div>
-
-  <div>
-    <router-link to="/test">Dummy Chart</router-link>
+    <router-link to="/test"></router-link>
   </div>
 
   <router-view></router-view>
