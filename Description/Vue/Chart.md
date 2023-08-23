@@ -68,80 +68,80 @@ _Frontend_
 DTO, Service, Repository, Entity 들도 작성했으나 글에선 건너뜁니다.
 
 ```java
-@Component  
-@RequiredArgsConstructor  
-public class Parser {  
-    private final FrameRepository frameRepository;  
-    private final Logger log = LoggerFactory.getLogger(Parser.class);  
-  
-    /**  
+@Component
+@RequiredArgsConstructor
+public class Parser {
+    private final FrameRepository frameRepository;
+    private final Logger log = LoggerFactory.getLogger(Parser.class);
+
+    /**
      * 변환, 리스트 저장 실패 시 트랜잭션 롤백  
-     */  
-    @PostConstruct  
-    @Transactional    
-    public void initData() {  
+     */
+    @PostConstruct
+    @Transactional
+    public void initData() {
         // 임시로 로컬에서 CSV를 읽어옴  
-        Resource resource = new ClassPathResource("sample/test.csv");  
-  
-        try {  
-            List<String> lines = Files.readAllLines(Paths.get(resource.getFile().getPath()), StandardCharsets.UTF_8);  
-            List<Frame> list = new ArrayList<>();  
-  
+        Resource resource = new ClassPathResource("sample/test.csv");
+
+        try {
+            List<String> lines = Files.readAllLines(Paths.get(resource.getFile().getPath()), StandardCharsets.UTF_8);
+            List<Frame> list = new ArrayList<>();
+
             // CSV의 첫 행은 헤더이기 때문에 0번쨰 인덱스 스킵  
-            for (int i=1; i<lines.size(); i++) {  
-                String[] split = lines.get(i).split(",");  
-  
+            for (int i=1; i<lines.size(); i++) {
+                String[] split = lines.get(i).split(",");
+
                 // CSV 파일의 값중 String이 아닌 값들의 타입 변환 준비  
-                int count;  
-                float frameTime;  
-                long systemTimestamp;  
-                LocalDateTime systemDate;  
-                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss yyyy", Locale.ENGLISH);  
-                String dateString = split[4];  
-  
-                try {  
+                int count;
+                float frameTime;
+                long systemTimestamp;
+                LocalDateTime systemDate;
+                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss yyyy", Locale.ENGLISH);
+                String dateString = split[4];
+
+                try {
                     // Count 변환  
-                    count = Integer.parseInt(split[0]);  
-  
+                    count = Integer.parseInt(split[0]);
+
                     // Frame Time 변환  
-                    Float frameValue = Float.parseFloat(split[2]);  
+                    Float frameValue = Float.parseFloat(split[2]);
                     frameTime = Float.parseFloat((String.format("%.4f", frameValue))); // 소수점 4자리 까지만  
-  
+
                     // System TimeStamp 변환  
-                    systemTimestamp = Long.parseLong(split[5]);  
-  
+                    systemTimestamp = Long.parseLong(split[5]);
+
                     // System Date 날짜 변환  
-                    systemDate = LocalDateTime.parse(dateString, dateFormat);  
-                } catch (Exception e) {  
-                    log.error("CSV 데이터 변환 실패");  
-                    throw new CommonException("DATA-003", HttpStatus.BAD_REQUEST);  
-                }  
-  
+                    systemDate = LocalDateTime.parse(dateString, dateFormat);
+                } catch (Exception e) {
+                    log.error("CSV 데이터 변환 실패");
+                    throw new CommonException("DATA-003", HttpStatus.BAD_REQUEST);
+                }
+
                 // Entity 생성  
-                Frame frame = Frame.createOf(  
-                        count,  
-                        frameTime,  
-                        split[3],  
-                        systemDate,  
-                        systemTimestamp  
-                );  
-  
-                list.add(frame);  
-            }  
-  
+                Frame frame = Frame.createOf(
+                        count,
+                        frameTime,
+                        split[3],
+                        systemDate,
+                        systemTimestamp
+                );
+
+                list.add(frame);
+            }
+
             // 리스트에 Entity 추가  
-            try {  
-                frameRepository.saveAll(list);  
-            } catch (Exception e) {  
-                log.error("Entity List 저장 실패");  
-                throw new CommonException("DATA-002", HttpStatus.BAD_REQUEST);  
-            }  
-  
-        } catch (IOException e) {  
-            log.error("데이터 파싱 실패");  
-            throw new CommonException("DATA-001", HttpStatus.BAD_REQUEST);  
-        }  
-    }  
+            try {
+                frameRepository.saveAll(list);
+            } catch (Exception e) {
+                log.error("Entity List 저장 실패");
+                throw new CommonException("DATA-002", HttpStatus.BAD_REQUEST);
+            }
+
+        } catch (IOException e) {
+            log.error("데이터 파싱 실패");
+            throw new CommonException("DATA-001", HttpStatus.BAD_REQUEST);
+        }
+    }
 }
 ```
 
@@ -160,24 +160,24 @@ public class Parser {
 **Template**
 
 ```html
-<template>  
-  <div>  
-    <h2 align="center">Doughnut Chart</h2>  
-    <DoughnutChart ref="doughnutRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />  
-    <button @click="shuffleData">Shuffle</button>  
-  </div>  
-  
-  <div>  
-    <h2 align="center">PolarArea Chart</h2>  
-    <PolarAreaChart ref="polarAreaRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />  
-    <button @click="shuffleData">Shuffle</button>  
-  </div>  
-  
-  <div>  
-    <h2 align="center">Line Chart</h2>  
-    <BarChart ref="barRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />  
-    <button @click="shuffleData">Shuffle</button>  
-  </div>  
+<template>
+    <div>
+        <h2 align="center">Doughnut Chart</h2>
+        <DoughnutChart ref="doughnutRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />
+        <button @click="shuffleData">Shuffle</button>
+    </div>
+
+    <div>
+        <h2 align="center">PolarArea Chart</h2>
+        <PolarAreaChart ref="polarAreaRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />
+        <button @click="shuffleData">Shuffle</button>
+    </div>
+
+    <div>
+        <h2 align="center">Line Chart</h2>
+        <BarChart ref="barRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />
+        <button @click="shuffleData">Shuffle</button>
+    </div>
 </template>  
 ```
 
@@ -186,60 +186,60 @@ public class Parser {
 **TimeGraph.vue**
 
 ```ts
-<script lang="ts" setup>  
-import {ref, computed, onMounted} from 'vue';  
-import { DoughnutChart, BubbleChart, LineChart, RadarChart, PieChart, PolarAreaChart, BarChart, ScatterChart } from 'vue-chart-3';  
-import {Chart, registerables} from "chart.js";  
-import { shuffle } from 'lodash';  
-  
-Chart.register(...registerables);  
-  
-const data = ref<number[]>([30, 40, 60, 70, 5]);  
-const doughnutRef = ref<InstanceType<typeof DoughnutChart> | null>(null);  
-const polarAreaRef = ref<InstanceType<typeof PolarAreaChart> | null>(null);  
-const barRef = ref<InstanceType<typeof BarChart> | null>(null);  
-  
-  
+<script lang="ts" setup>
+import {ref, computed, onMounted} from 'vue';
+import { DoughnutChart, BubbleChart, LineChart, RadarChart, PieChart, PolarAreaChart, BarChart, ScatterChart } from 'vue-chart-3';
+import {Chart, registerables} from "chart.js";
+import { shuffle } from 'lodash';
+
+Chart.register(...registerables);
+
+const data = ref<number[]>([30, 40, 60, 70, 5]);
+const doughnutRef = ref<InstanceType<typeof DoughnutChart> | null>(null);
+const polarAreaRef = ref<InstanceType<typeof PolarAreaChart> | null>(null);
+const barRef = ref<InstanceType<typeof BarChart> | null>(null);
+
+
 // Chart Data  
-const testData = computed(() => ({  
-  labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],  
-  datasets: [  
-    {  
-      data: data.value,  
-      backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],  
-    },  
-  ],  
-}));  
-  
+const testData = computed(() => ({
+    labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],
+    datasets: [
+        {
+            data: data.value,
+            backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
+        },
+    ],
+}));
+
 // Chart Options  
-const options = ref({  
-  responsive: true,  
-  plugins: {  
-    legend: {  
-      position: 'top',  
-    },  
-    title: {  
-      display: true,  
-      text: 'Chart.js Doughnut Chart',  
-    },  
-  },  
-});  
-  
+const options = ref({
+    responsive: true,
+    plugins: {
+        legend: {
+            position: 'top',
+        },
+        title: {
+            display: true,
+            text: 'Chart.js Doughnut Chart',
+        },
+    },
+});
+
 // Shuffle  
-const shuffleData = () => {  
-  data.value = shuffle(data.value);  
-};  
-  
+const shuffleData = () => {
+    data.value = shuffle(data.value);
+};
+
 // Render Events  
-function handleChartRender(chart: any) {  
-  console.log(chart);  
-}  
-  
+function handleChartRender(chart: any) {
+    console.log(chart);
+}
+
 // Life Cycle Hooks  
-onMounted(() => {  
-  console.log(doughnutRef.value?.chartInstance);  
-  doughnutRef.value?.chartInstance.toBase64Image();  
-})  
+onMounted(() => {
+    console.log(doughnutRef.value?.chartInstance);
+    doughnutRef.value?.chartInstance.toBase64Image();
+})
 </script>
 ```
 
@@ -306,12 +306,12 @@ v-if를 통해 차트가 렌더링 되기 전 데이터가 들어오지 않는�
 `onBeforeMount` Lifecycle Hook을 사용해도 되지만 간단하게 v-if를 사용하였습니다.
 
 ```html
-<!-- Chart Instance 접근 방법 = scatterRef.value?.chartInstance.toBase64Image(); -->  
-<template>  
-  <div>  
-    <h2 align="center">Scatter Chart</h2>  
-    <ScatterChart v-if="frameData && frameData.length" ref="scatterRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />  
-  </div>  
+<!-- Chart Instance 접근 방법 = scatterRef.value?.chartInstance.toBase64Image(); -->
+<template>
+    <div>
+        <h2 align="center">Scatter Chart</h2>
+        <ScatterChart v-if="frameData && frameData.length" ref="scatterRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />
+    </div>
 </template>  
 ```
 
@@ -327,106 +327,106 @@ v-if를 통해 차트가 렌더링 되기 전 데이터가 들어오지 않는�
 <br>
 
 ```ts
-<script lang="ts" setup>  
-import {ref, computed, onMounted, watch } from 'vue';  
-import { ScatterChart } from 'vue-chart-3';  
-import { Chart, registerables } from "chart.js";  
-import { shuffle, groupBy, sumBy } from 'lodash';  
-import { fetchFrame } from "@/stores/api";  
-import moment from "moment";  
-  
-Chart.register(...registerables);  
-  
-interface FrameData {  
-  count: number;  
-  frameId: number;  
-  frameTime: number;  
-  instanceId: string;  
-  systemDate: string;  
-  systemTimestamp: number;  
-}  
-  
-const scatterRef = ref<InstanceType<typeof ScatterChart> | null>(null);  
-const frameData = ref<FrameData[]>([]);  
-  
+<script lang="ts" setup>
+import {ref, computed, onMounted, watch } from 'vue';
+import { ScatterChart } from 'vue-chart-3';
+import { Chart, registerables } from "chart.js";
+import { shuffle, groupBy, sumBy } from 'lodash';
+import { fetchFrame } from "@/stores/api";
+import moment from "moment";
+
+Chart.register(...registerables);
+
+interface FrameData {
+    count: number;
+    frameId: number;
+    frameTime: number;
+    instanceId: string;
+    systemDate: string;
+    systemTimestamp: number;
+}
+
+const scatterRef = ref<InstanceType<typeof ScatterChart> | null>(null);
+const frameData = ref<FrameData[]>([]);
+
 // Chart Data  
-const testData = computed(() => ({  
-  labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],  
-  datasets: [  
-    {  
-      data: frameData.value.map(frame => ({ x : moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').format('MM/DD/YYYY HH:mm'), y : frame.count })),  
-      backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],  
-    },  
-  ],  
-}));  
-  
+const testData = computed(() => ({
+    labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],
+    datasets: [
+        {
+            data: frameData.value.map(frame => ({ x : moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').format('MM/DD/YYYY HH:mm'), y : frame.count })),
+            backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
+        },
+    ],
+}));
+
 // Chart Options  
-const options = ref({  
-  responsive: true,  
-  plugins: {  
-    legend: {  
-      position: 'top',  
-    },  
-  
-    title: {  
-      display: true,  
-      text: 'Cvedia Events',  
-    },  
-  },  
-  
-  // Time Scales  
-  scales: {  
-    // x축 System Date 시간 포맷 설정  
-    x: {  
-      type: 'linear',  
-      min: 0,  
-      max: 59, // 분의 최대 값  
-      title: {  
-        display: true,  
-        text: 'Minutes'  
-      }  
-    },  
-    // y축 Count 포맷 설정  
-    y: {  
-      title: {  
-        display: true,  
-        text: 'Count'  
-      },  
-      ticks: {  
-        stepSize: 1,  
-        beginAtZero: true  
-      }  
-    }  
-  }  
-});  
-  
+const options = ref({
+    responsive: true,
+    plugins: {
+        legend: {
+            position: 'top',
+        },
+
+        title: {
+            display: true,
+            text: 'Cvedia Events',
+        },
+    },
+
+    // Time Scales  
+    scales: {
+        // x축 System Date 시간 포맷 설정  
+        x: {
+            type: 'linear',
+            min: 0,
+            max: 59, // 분의 최대 값  
+            title: {
+                display: true,
+                text: 'Minutes'
+            }
+        },
+        // y축 Count 포맷 설정  
+        y: {
+            title: {
+                display: true,
+                text: 'Count'
+            },
+            ticks: {
+                stepSize: 1,
+                beginAtZero: true
+            }
+        }
+    }
+});
+
 // Rest API에서 데이터 받아오기  
-const setData = async () => {  
-  try {  
-    frameData.value = await fetchFrame();  
-  } catch (error) {  
-    console.error('데이터를 가져오는 중 오류 발생:', error);  
-  }  
-};  
-  
+const setData = async () => {
+    try {
+        frameData.value = await fetchFrame();
+    } catch (error) {
+        console.error('데이터를 가져오는 중 오류 발생:', error);
+    }
+};
+
 // Render Events  
-function handleChartRender(chart: any) {  
-  console.log(chart);  
-}  
-  
+function handleChartRender(chart: any) {
+    console.log(chart);
+}
+
 // Life Cycle Hooks  
-onMounted(() => {  
-  setData().then(() => {  
-    scatterRef.value?.chartInstance.update();  
-  });  
-});  
-  
+onMounted(() => {
+    setData().then(() => {
+        scatterRef.value?.chartInstance.update();
+    });
+});
+
 // Watcher  
-watch(frameData, (newData) => {  
-  if (newData.length > 0) {  
-    scatterRef.value?.update();  
-  }  
-});  
+watch(frameData, (newData) => {
+    if (newData.length > 0) {
+        scatterRef.value?.update();
+    }
+});
 </script>
 ```
 
@@ -453,28 +453,28 @@ data: frameData.value.map(frame => ({ x : moment(frame.systemDate, 'EEE MMM dd H
 제 코드에서는 중복값과 Count의 값을 합산하지는 않을 것이지만 그룹화 하는 코드만 적어보겠습니다.
 
 ```ts
-const groupedByMinutes = computed(() =>  
-    groupBy(frameData.value, (data) => moment(data.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes())  
-);  
-  
-const aggregatedData = computed(() => {  
-  return Object.entries(groupedByMinutes.value).map(([minute, dataGroup]) => {  
-    return {  
-      x: parseInt(minute),  
-      y: sumBy(dataGroup, 'count')  
-    };  
-  });  
-});  
-  
+const groupedByMinutes = computed(() =>
+    groupBy(frameData.value, (data) => moment(data.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes())
+);
+
+const aggregatedData = computed(() => {
+    return Object.entries(groupedByMinutes.value).map(([minute, dataGroup]) => {
+        return {
+            x: parseInt(minute),
+            y: sumBy(dataGroup, 'count')
+        };
+    });
+});
+
 // Chart Data  
-const testData = computed(() => ({  
-  labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],  
-  datasets: [  
-    {  
-      data: aggregatedData.value,  
-      backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],  
-    },  
-  ],  
+const testData = computed(() => ({
+    labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],
+    datasets: [
+        {
+            data: aggregatedData.value,
+            backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
+        },
+    ],
 }));
 ```
 
