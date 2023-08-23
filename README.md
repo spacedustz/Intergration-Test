@@ -84,7 +84,8 @@ _Frontend_
 <details>
 <summary>Frontend Details</summary>
 
-- [Chart.js를 이용한 실시간 반응형 시각화](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Vue/Vue.md)
+- [Vite 기반 Vue 3 Composition + TypeScript 프로젝트 세팅](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Vue/Setup.md)
+- [Chart.js를 이용한 정적인 차트 구현](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Vue/Chart.md)
 </details>
 
 ---
