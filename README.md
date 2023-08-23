@@ -1,9 +1,14 @@
 # Intergration-Test
 A repository for All Types of Implementation Tests
 
+모든 유형의 구현 테스트를 위한 저장소
+
 ---
 
-## 반응형 통계 데이터 시각화 (Chart.js)
+## 1. 실시간 반응형 통계 데이터 시각화
+
+<details>
+<summary>서버 구성</summary>
 
 **프로젝트 구성**
 - Backend : Spring Boot 3.1.2
@@ -36,10 +41,11 @@ _Frontend_
 - Vuex
 - Vue Router
 - date-fns & @types/date-fns
+</details>
 
 <br>
 
-## 상세 내용
+### 상세 내용
 
 <details>
 <summary>Backend Details</summary>
@@ -54,7 +60,9 @@ _Frontend_
 - Spring RestDocs
 - MariaDB
 - H2
+
 ---
+
 ## CSV
 - [아주 간단한 CSV 파싱 테스트](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Converter/CSV.md)
 - Spring Batch를 이용해 주기적으로 자동 파싱 & DB 저장 (준비 중)
@@ -75,7 +83,10 @@ _Frontend_
 
 <details>
 <summary>Frontend Details</summary>
+
 - [Chart.js를 이용한 실시간 반응형 시각화](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Vue/Vue.md)
-
-
 </details>
+
+---
+
+## 다른 프로젝트 준비 중
