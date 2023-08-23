@@ -89,7 +89,7 @@ _Frontend_
 <summary>Frontend Details</summary>
 
 - [Vite 기반 Vue 3 Composition + TypeScript 프로젝트 세팅](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Vue/Setup.md)
-- [Chart.js를 이용한 정적인 차트 구현](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Vue/Chart.md)
+- [Chart.js - 차트 구현](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Vue/Chart.md)
 </details>
 
 ---
