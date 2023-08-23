@@ -78,7 +78,9 @@ lintOnSave:false
 - router
 - eslint
 - date-fns & @types/date-fns
+- moment
+- chartjs-adapter-moment
 
 ```
-npm i axios hls.js vue-chart-3 chart.js date-fns @types/date-fns vuex@next vue-router@next --save && npm install eslint-plugin-vue@latest -u && npm i eslint sass -D
+npm i axios hls.js moment chartjs-adapter-moment vue-chart-3 chart.js date-fns @types/date-fns vuex@next vue-router@next --save && npm install eslint-plugin-vue@latest -u && npm i eslint sass -D
 ```
