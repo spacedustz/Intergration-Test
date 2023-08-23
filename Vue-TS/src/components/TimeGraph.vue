@@ -4,7 +4,6 @@
   <div>
     <h2 align="center">Scatter Chart</h2>
     <ScatterChart v-if="frameData && frameData.length" ref="scatterRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />
-    <button @click="shuffleData">Shuffle</button>
   </div>
 </template>
 
@@ -27,7 +26,6 @@ interface FrameData {
   systemTimestamp: number;
 }
 
-const data = ref<number[]>([30, 40, 60, 70, 5]);
 const scatterRef = ref<InstanceType<typeof ScatterChart> | null>(null);
 const frameData = ref<FrameData[]>([]);
 
@@ -41,6 +39,30 @@ const testData = computed(() => ({
     },
   ],
 }));
+
+// const groupedByMinutes = computed(() =>
+//     groupBy(frameData.value, (data) => moment(data.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes())
+// );
+//
+// const aggregatedData = computed(() => {
+//   return Object.entries(groupedByMinutes.value).map(([minute, dataGroup]) => {
+//     return {
+//       x: parseInt(minute),
+//       y: sumBy(dataGroup, 'count')
+//     };
+//   });
+// });
+//
+// // Chart Data
+// const testData = computed(() => ({
+//   labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],
+//   datasets: [
+//     {
+//       data: aggregatedData.value,
+//       backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
+//     },
+//   ],
+// }));
 
 // Chart Options
 const options = ref({
@@ -81,11 +103,6 @@ const options = ref({
     }
   }
 });
-
-// Shuffle
-const shuffleData = () => {
-  data.value = shuffle(data.value);
-};
 
 // Rest API에서 데이터 받아오기
 const setData = async () => {
