@@ -18,7 +18,6 @@ A repository for All Types of Implementation Tests
 <details>
 <summary>서버 구성</summary>
 
-**프로젝트 구성**
 - Backend : Spring Boot 3.1.2
 - Frontend : Vue 3
 
