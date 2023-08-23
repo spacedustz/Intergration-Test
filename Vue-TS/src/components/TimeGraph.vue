@@ -12,7 +12,7 @@
 import {ref, computed, onMounted, watch } from 'vue';
 import { ScatterChart } from 'vue-chart-3';
 import { Chart, registerables } from "chart.js";
-import { shuffle } from 'lodash';
+import { shuffle, groupBy, sumBy } from 'lodash';
 import { fetchFrame } from "@/stores/api";
 import moment from "moment";
 
@@ -31,15 +31,12 @@ const data = ref<number[]>([30, 40, 60, 70, 5]);
 const scatterRef = ref<InstanceType<typeof ScatterChart> | null>(null);
 const frameData = ref<FrameData[]>([]);
 
-
-// const minutes = frameData.value.map(frame => moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes());
-
 // Chart Data
 const testData = computed(() => ({
   labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],
   datasets: [
     {
-      data: frameData.value.map(frame => ({ x : moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes(), y : frame.count })),
+      data: frameData.value.map(frame => ({ x : moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').format('MM/DD/YYYY HH:mm'), y : frame.count })),
       backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
     },
   ],
@@ -61,27 +58,25 @@ const options = ref({
 
   // Time Scales
   scales: {
-    // x축 시간 포맷 설정
+    // x축 System Date 시간 포맷 설정
     x: {
-      type: 'time',
-      time: {
-        parser: 'MM/DD/YYYY HH:mm',
-        tooltipFormat: 'MM/DD/YYYY HH:mm',
-        unit: 'minute',
-        displayFormats: {
-          minute: 'HH:mm'
-        }
-      },
+      type: 'linear',
+      min: 0,
+      max: 59, // 분의 최대 값
       title: {
         display: true,
-        text: 'System Date'
+        text: 'Minutes'
       }
     },
-    // y축 설정
+    // y축 Count 포맷 설정
     y: {
       title: {
         display: true,
         text: 'Count'
+      },
+      ticks: {
+        stepSize: 1,
+        beginAtZero: true
       }
     }
   }
@@ -108,7 +103,9 @@ function handleChartRender(chart: any) {
 
 // Life Cycle Hooks
 onMounted(() => {
-  setData();
+  setData().then(() => {
+    scatterRef.value?.chartInstance.update();
+  });
 });
 
 // Watcher
