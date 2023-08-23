@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import 'chartjs-adapter-moment';
 
 import App from './App.vue'
 import router from './router'
