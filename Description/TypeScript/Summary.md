@@ -541,3 +541,4 @@ function someFunc(val: string|number, isNumber: boolean) {
 
 이를 타입 단언이나 if 조건문으로 해결할 수도 있지만, 마지막 함수와 같이 !를 사용하는 Non-null 단언 연산자를 이용해 간단하게 정리할 수 있습니다.
 
+ 
