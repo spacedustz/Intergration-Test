@@ -1,13 +1,22 @@
+<!-- Chart Instance 접근 방법 = scatterRef.value?.chartInstance.toBase64Image(); -->
+
 <template>
   <div>
-    <line-chart :chart-data="chartData" :options="chartOptions"></line-chart>
+    <h2 align="center">Scatter Chart</h2>
+    <ScatterChart v-if="frameData && frameData.length" ref="scatterRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />
+    <button @click="shuffleData">Shuffle</button>
   </div>
 </template>
 
-<script setup lang="ts">
-import {onMounted, ref, watchEffect} from 'vue';
-import { LineChart } from "vue-chart-3";
-import {fetchFrame} from "@/stores/api";
+<script lang="ts" setup>
+import {ref, computed, onMounted, watch } from 'vue';
+import { ScatterChart } from 'vue-chart-3';
+import { Chart, registerables } from "chart.js";
+import { shuffle } from 'lodash';
+import { fetchFrame } from "@/stores/api";
+import moment from "moment";
+
+Chart.register(...registerables);
 
 interface FrameData {
   count: number;
@@ -18,66 +27,94 @@ interface FrameData {
   systemTimestamp: number;
 }
 
+const data = ref<number[]>([30, 40, 60, 70, 5]);
+const scatterRef = ref<InstanceType<typeof ScatterChart> | null>(null);
 const frameData = ref<FrameData[]>([]);
 
-const setData = async () => {
-  try {
-    frameData.value = await fetchFrame();
-    chartData.value.datasets.map(i => i.data = frameData.value.map(data => data))
 
-  } catch (error) {
-    console.error('데이터를 가져오는 중 오류 발생:', error);
-  }
-};
+// const minutes = frameData.value.map(frame => moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes());
 
-const chartData = ref({
-  labels: frameData.value.map(data => data.frameId),
+// Chart Data
+const testData = computed(() => ({
+  labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],
   datasets: [
     {
-      label: '프레임 카운트',
-      data: [],
-      borderColor: 'rgba(75, 192, 192, 1)',
-      fill: false,
+      data: frameData.value.map(frame => ({ x : moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes(), y : frame.count })),
+      backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
     },
   ],
-});
+}));
 
-const chartOptions = ref({
+// Chart Options
+const options = ref({
   responsive: true,
-  maintainAspectRatio: false,
+  plugins: {
+    legend: {
+      position: 'top',
+    },
+
+    title: {
+      display: true,
+      text: 'Cvedia Events',
+    },
+  },
+
+  // Time Scales
   scales: {
+    // x축 시간 포맷 설정
     x: {
       type: 'time',
       time: {
-        unit: 'day'
+        parser: 'MM/DD/YYYY HH:mm',
+        tooltipFormat: 'MM/DD/YYYY HH:mm',
+        unit: 'minute',
+        displayFormats: {
+          minute: 'HH:mm'
+        }
+      },
+      title: {
+        display: true,
+        text: 'System Date'
+      }
+    },
+    // y축 설정
+    y: {
+      title: {
+        display: true,
+        text: 'Count'
       }
     }
   }
 });
 
-// 주기적으로 Watch를 걸고 데이터가 변경될 경우 frameData를 업데이트 함
-// 이 방법은 API에 많은 부담을 줄 수 있으므로, 실제 프로덕트에서는 웹소켓이나 다른 방법 권장
-watchEffect(async () => {
-  setInterval(async () => {
+// Shuffle
+const shuffleData = () => {
+  data.value = shuffle(data.value);
+};
+
+// Rest API에서 데이터 받아오기
+const setData = async () => {
+  try {
     frameData.value = await fetchFrame();
-  }, 10000);
+  } catch (error) {
+    console.error('데이터를 가져오는 중 오류 발생:', error);
+  }
+};
 
-  chartData.value = {
-    labels: frameData.value.map(data => data.frameId),
-    datasets: [
-      {
-        label: '프레임 카운트',
-        data: frameData.value.map(data => data),
-        borderColor: 'rgba(75, 192, 192, 1)',
-        fill: false,
-      },
-    ],
-  };
-})
+// Render Events
+function handleChartRender(chart: any) {
+  console.log(chart);
+}
 
-onMounted(async () => {
-  await setData();
+// Life Cycle Hooks
+onMounted(() => {
+  setData();
+});
+
+// Watcher
+watch(frameData, (newData) => {
+  if (newData.length > 0) {
+    scatterRef.value?.update();
+  }
 });
 </script>
-
-<style scoped></style>
