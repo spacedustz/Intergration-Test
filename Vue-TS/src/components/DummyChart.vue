@@ -1,36 +1,22 @@
+<!-- Chart Instance 접근 방법 = scatterRef.value?.chartInstance.toBase64Image(); -->
+
 <template>
   <div>
     <h2 align="center">Scatter Chart</h2>
-    <ScatterChart ref="scatterRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />
-    <button @click="shuffleData">Shuffle</button>
-  </div>
-
-  <div>
-    <h2 align="center">PolarArea Chart</h2>
-    <PolarAreaChart ref="polarAreaRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />
-    <button @click="shuffleData">Shuffle</button>
-  </div>
-
-  <div>
-    <h2 align="center">Line Chart</h2>
-    <BarChart ref="barRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />
+    <ScatterChart v-if="frameData && frameData.length" ref="scatterRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />
     <button @click="shuffleData">Shuffle</button>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {ref, computed, onMounted} from 'vue';
-import { PolarAreaChart, BarChart, ScatterChart } from 'vue-chart-3';
-import {Chart, registerables} from "chart.js";
+import {ref, computed, onMounted, watch } from 'vue';
+import { ScatterChart } from 'vue-chart-3';
+import { Chart, registerables } from "chart.js";
 import { shuffle } from 'lodash';
 import { fetchFrame } from "@/stores/api";
+import moment from "moment";
 
 Chart.register(...registerables);
-
-const data = ref<number[]>([30, 40, 60, 70, 5]);
-const scatterRef = ref<InstanceType<typeof ScatterChart> | null>(null);
-const polarAreaRef = ref<InstanceType<typeof PolarAreaChart> | null>(null);
-const barRef = ref<InstanceType<typeof BarChart> | null>(null);
 
 interface FrameData {
   count: number;
@@ -41,15 +27,19 @@ interface FrameData {
   systemTimestamp: number;
 }
 
+const data = ref<number[]>([30, 40, 60, 70, 5]);
+const scatterRef = ref<InstanceType<typeof ScatterChart> | null>(null);
 const frameData = ref<FrameData[]>([]);
 
+
+// const minutes = frameData.value.map(frame => moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes());
 
 // Chart Data
 const testData = computed(() => ({
   labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],
   datasets: [
     {
-      data: frameData.value.map(frame => ({ x : new Date(frame.systemDate), y : frame.count} )),
+      data: frameData.value.map(frame => ({ x : moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes(), y : frame.count })),
       backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
     },
   ],
@@ -69,14 +59,25 @@ const options = ref({
     },
   },
 
+  // Time Scales
   scales: {
+    // x축 시간 포맷 설정
     x: {
       type: 'time',
+      time: {
+        parser: 'MM/DD/YYYY HH:mm',
+        tooltipFormat: 'MM/DD/YYYY HH:mm',
+        unit: 'minute',
+        displayFormats: {
+          minute: 'HH:mm'
+        }
+      },
       title: {
         display: true,
         text: 'System Date'
       }
     },
+    // y축 설정
     y: {
       title: {
         display: true,
@@ -107,8 +108,13 @@ function handleChartRender(chart: any) {
 
 // Life Cycle Hooks
 onMounted(() => {
-  console.log(scatterRef.value?.chartInstance);
-  scatterRef.value?.chartInstance.toBase64Image();
   setData();
-})
+});
+
+// Watcher
+watch(frameData, (newData) => {
+  if (newData.length > 0) {
+    scatterRef.value?.update();
+  }
+});
 </script>
