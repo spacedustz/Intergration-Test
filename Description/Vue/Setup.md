@@ -12,7 +12,7 @@ npm i bootstrap bootstrap-vue-3
 main 파일에 BootStrap 적용
 
 ```typescript
-import { createApp } from "vue";
+import {createApp} from "Description/Vue/Setup";
 import App from "./App.vue";
 import router from "./router";
 
