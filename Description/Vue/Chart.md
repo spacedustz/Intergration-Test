@@ -4,9 +4,9 @@
 
 <br>
 
-사내 프로젝트가 시작 되기 전 프론트엔드도 연습할 겸 간단하게 테스트 해보려고 만든 저장소입니다.
+사내 프로젝트가 시작 되기 전 프론트엔드도 연습할 겸 간단하게 더미데이터를 만들어 테스트 해보려고 만든 저장소입니다.
 
-혹시 틀린점이나 프론트엔드 고수형님 계시면 피드백 부탁드립니다..ㅠ
+프론트엔드를 다루는게 처음이라 혹시 틀린점이나 프론트엔드 고수형님 계시면 피드백 부탁드립니다..😭
 
 <br>
 
@@ -320,39 +320,38 @@ v-if를 통해 차트가 렌더링 되기 전 데이터가 들어오지 않는�
 
 **TimeGraph.vue**
 
-차트의 X축에는 데이터 중 `systemDate`, Y축은 `count` 필드로 설정할겁니다.
+- 차트의 X축에는 데이터 중 `systemDate`, Y축은 `count` 필드로 설정할겁니다.
+- ChartOption에 locale에 그래프상 X축과 Y축의 포맷, 출력 형식등을 지정해줍니다.
+- 비동기 함수인 setData()를 `onMounted()`의 콜백함수로 넣고 데이터가 전부 로드될떄까지 기다릴 수 있도록, then()을 사용해서 데이터가 전부 로드 된 후 함수를 비동기로 실행하도록 해주었습니다.
+- 그리고 감시자(Watcher)를 사용 해 Backend에서 들어오는 데이터가 업데이트 된다면 차트를 업데이트 하도록 포인팅 해주었습니다.
 
-그래서 ChartData의 데이터에서 백엔드에서 들어온 데이터를 돌면서 `systemDate`만 `moment` 라이브러리를 써서 변환해줍니다.
+<br>
 
 ```ts
-data: frameData.value.map(frame => ({ x : moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes(), y : frame.count }))
+const groupedByMinutes = computed(() =>  
+    groupBy(frameData.value, (data) => moment(data.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes())  
+);  
+  
+const aggregatedData = computed(() => {  
+  return Object.entries(groupedByMinutes.value).map(([minute, dataGroup]) => {  
+    return {  
+      x: parseInt(minute),  
+      y: sumBy(dataGroup, 'count')  
+    };  
+  });  
+});  
+  
+// Chart Data  
+const testData = computed(() => ({  
+  labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],  
+  datasets: [  
+    {  
+      data: aggregatedData.value,  
+      backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],  
+    },  
+  ],  
+}));
 ```
-
-하지만 위의 코드로 ChartData를 작성할 시,
-
-동일한 "분"에 여러 데이터 포인트가 있다면 중복 문제가 생길 수 있습니다. 따라서 동일한 "분"의 여러 데이터 포인트를 합산하려면 제안한 방법을 사용하셔야 합니다.
-
-또한, 현재 x축의 데이터 포맷을 `MM/DD/YYYY HH:mm` 형식으로 가져오는 것은 필요 없습니다.
-
-대신, '분' 값을 직접 사용해야 합니다.
-
-코드에서 summarizedData 부분을 보시면 이해가 되실겁니다.
-
-<br>
-
-그 후 ChartOption에 locale에 그래프상 X축과 Y축의 포맷, 출력 형식등을 지정해줍니다.
-
-위 코드상 Chart Options이 있는 부분에서 x 축의 `parser`와 `tooltipFormat`, `displayFormats`를 설정해줍니다.
-
-<br>
-
-그리고 비동기 함수인 setData()를 `onMounted()`의 콜백함수로 넣고 데이터가 전부 로드될떄까지 기다릴 수 있도록,
-
-then()을 사용해서 데이터가 전부 로드 된 후 함수를 비동기로 실행하도록 해주었습니다.
-
-<br>
-
-그리고 감시자(Watcher)를 사용 해 Backend에서 들어오는 데이터가 업데이트 된다면 차트를 업데이트 하도록 포인팅 해주었습니다.
 
 ```ts
 <script lang="ts" setup>  
@@ -467,6 +466,28 @@ watch(frameData, (newData) => {
 <br>
 
 ![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/scatter.png)
+
+<br>
+
+> 😲 **만약 x축에 중복 데이터가 있는 경우 x축 그룹화, y축 합산**
+
+ChartData의 데이터에서 백엔드에서 들어온 데이터를 돌면서 `systemDate`만 `moment` 라이브러리를 써서 변환해주었습니다.
+
+```ts
+data: frameData.value.map(frame => ({ x : moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes(), y : frame.count }))
+```
+
+<br>
+
+하지만 위의 코드로 ChartData를 작성할 시, 동일한 "분"에 여러 데이터 포인트가 있다면 중복 문제가 생길 수 있습니다.
+
+동일한 "분"의 여러 데이터 포인트를 합산하려면aus '분' 값을 직접 사용해야 합니다.
+
+제 코드에서는 중복값과 Count의 값을 합산하지는 않을 것이지만 그룹화 하는 코드만 적어보겠습니다.
+
+<br>
+
+내용 추가 중..
 
 ---
 
