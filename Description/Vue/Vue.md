@@ -1,4 +1,4 @@
-## BootStrap 설치 & 적용
+### BootStrap 설치 & 적용
 
 [BootStrap Site](https://getbootstrap.com/)
 
@@ -25,7 +25,7 @@ createApp(App).use(router).use(BootstrapVue3).mount("#app");
 
 ---
 
-## Useless Component 제거
+### Useless Component 제거
 
 - Components, Views 디렉토리 하위 파일들 전부 제거
 - Router 디렉토리 하위 index.ts에 Import된 불필요 컴포넌트 제거
@@ -45,19 +45,7 @@ export default router;
 
 ---
 
-## Lint 단일 이름 인식
-
-**vue.config.js 파일**
-
-<br>
-
-```
-// 추가
-lintOnSave:false
-```
-<br>
-
-## Lint 설정
+## ESLint 설정
 
 ```
 npm i -D eslint@7.32.0
@@ -66,19 +54,31 @@ npm install eslint@">=1.6.0 <7.0.0"
 
 <br>
 
+**ESLint 단일 파일 이름 인식**
+
+vue.config.js 파일
+
+```
+// 추가
+lintOnSave:false
+```
+
+---
+
 ## Vue 3 + TypeScript 프로젝트 생성
 - npm init vue@latest
 
 <br>
 
-## 필요한 라이브러리 설치
+## Vite 기반 Vue 3 + TypeScript 라이브러리 설치
 - axios
 - hls.js
-- vue-chartjs
+- vue-chart-3 & chart.js
 - vuex
 - router
 - eslint
+- date-fns & @types/date-fns
 
 ```
-npm i axios hls.js vue-chartjs vuex@next vue-router@next --save && npm install eslint-plugin-vue@latest -u && npm i eslint -D
+npm i axios hls.js vue-chart-3 chart.js date-fns @types/date-fns vuex@next vue-router@next --save && npm install eslint-plugin-vue@latest -u && npm i eslint sass -D
 ```

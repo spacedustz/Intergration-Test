@@ -48,11 +48,11 @@ Parcel 번들러가 빌드시 자동으로 타입스크립트를 컴파일합니
 <!doctype html>
 <html>
 <head>
-  <meta charset="UTF-8">
-  <title>TypeScript Test</title>
+    <meta charset="UTF-8">
+    <title>TypeScript Test</title>
 </head>
 <body>
-  <script src="main.ts"></script>
+<script src="../../TypeScript/main.ts"></script>
 </body>
 </html>
 ```
