@@ -93,7 +93,7 @@ public class Parser {
             }
 
         } catch (IOException e) {
-            log.error("데이터 파싱 실패");
+            log.error("===== 데이터 파싱 실패 =====");
             throw new CommonException("DATA-001", HttpStatus.BAD_REQUEST);
         }
     }
