@@ -86,6 +86,7 @@ public class Parser {
             // 리스트에 Entity 추가
             try {
                 frameRepository.saveAll(list);
+                log.info("========== 데이터 저장 성공 ==========");
             } catch (Exception e) {
                 log.error("Entity List 저장 실패");
                 throw new CommonException("DATA-002", HttpStatus.BAD_REQUEST);

@@ -54,6 +54,7 @@ const setData = async () => {
 
 /* ===== Fetch된 데이터를 동일한 값의 systemDate를 기준으로 Grouping ===== */
 const groupedByKey = computed(() => groupBy(frameData.value, frame => frame.systemDate));
+console.log('길이 ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ', groupedByKey.value.length)
 
 /* ===== 각각의 그룹화된 그룹에서 최대 count 값을 반환하는 배열을 생성 ===== */
 const maxCounts = computed(() => {
@@ -81,9 +82,10 @@ const chartData = computed(() => ({
       label: "Security Event",
       data: frameData.value.map((frame, index) => ({
         x: getMinutesFromSystemDate(frame.systemDate),
-        y: maxCounts.value[index] // 이 부분은 maxCounts에서 y 값을 가져옴
+        y: maxCounts.value[index], // 이 부분은 maxCounts에서 y 값을 가져옴
+        frameId: frame.frameId
       })),
-      backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
+      backgroundColor: ['lightblue', 'green', 'red', 'yellow', 'black'],
     },
   ],
 }));
@@ -94,22 +96,16 @@ const chartOptions = ref({
   maintainAspectRatio: false, // 차트의 비율을 고정하지 않음
   aspectRatio: 1, // 비율을 1:1로 설정
   plugins: {
-    tooltip: {
+    tooltips: {
       callbacks: {
-        title: function(tooltipItems) {
-          const dataIndex = tooltipItems[0]?.index;
-          if (typeof dataIndex !== 'undefined') {
-            const systemDate = frameData.value[dataIndex].systemDate;
-            const [year, month, day, hour, minute] = systemDate;
-            return `${year}-${month}-${day} ${hour}:${minute}`;
-          }
-          return '';
+        title: function() {
+          return 'Frame ID';
         },
-        label: function(tooltipItems) {
-          const dataIndex = tooltipItems?.index;
+        label: function(tooltipItem, data) {
+          const dataIndex = tooltipItem.index;
           if (typeof dataIndex !== 'undefined') {
-            const count = frameData.value[dataIndex].count;
-            return `Count: ${count}`;
+            const frameId = data.datasets[tooltipItem.datasetIndex].data[dataIndex].frameId;
+            return `Frame ID: ${frameId}`;
           }
           return '';
         }
@@ -128,11 +124,21 @@ const chartOptions = ref({
   scales: {
     // x축 System Date 시간 포맷 설정
     x: {
-      type: 'category',
+      type: 'time',
       title: {
         display: true,
-        text: 'Seconds'
+        text: 'Time (Minute:Seceond)'
       },
+      time: {
+        unit: 'minute',
+        displayFormats: {
+          minute: 'mm:ss'
+        },
+        parser: 'mm:ss'
+      },
+      ticks: {
+        source: 'auto'
+      }
     },
     // y축 Count 포맷 설정
     y: {
