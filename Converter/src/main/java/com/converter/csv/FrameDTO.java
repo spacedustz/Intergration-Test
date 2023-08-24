@@ -15,7 +15,7 @@ public class FrameDTO {
         private int count;
         private Float frameTime;
         private String instanceId;
-        private String systemDate;
+        private LocalDateTime systemDate;
         private Long systemTimestamp;
 
         public static FrameDTO.Response createOf(
@@ -23,7 +23,7 @@ public class FrameDTO {
                 int count,
                 Float frameTime,
                 String instanceId,
-                String systemDate,
+                LocalDateTime systemDate,
                 Long systemTimestamp) {
             return new FrameDTO.Response(id, count, frameTime, instanceId, systemDate, systemTimestamp);
         }
@@ -34,7 +34,7 @@ public class FrameDTO {
                     entity.getCount(),
                     entity.getFrameTime(),
                     entity.getInstanceId(),
-                    String.valueOf(LocalDateTime.parse(entity.getSystemDate().toString())),
+                    entity.getSystemDate(),
                     entity.getSystemTimestamp()
             );
         }
