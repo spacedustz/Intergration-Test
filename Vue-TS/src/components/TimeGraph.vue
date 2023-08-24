@@ -1,73 +1,120 @@
 <!-- Chart Instance 접근 방법 = scatterRef.value?.chartInstance.toBase64Image(); -->
-
 <template>
   <div>
     <h2 align="center">Scatter Chart</h2>
-    <ScatterChart v-if="frameData && frameData.length" ref="scatterRef" :chartData="testData" :options="options" @chart:render="handleChartRender" />
+    <div style="overflow: auto; max-width: 1000px; max-height: 800px;">
+      <ScatterChart
+          v-if="frameData && frameData.length"
+          ref="scatterRef" :chartData="chartData"
+          :options="chartOptions"
+          @chart:render="handleChartRender" />
+    </div>
   </div>
 </template>
 
 <script lang="ts" setup>
-import {ref, computed, onMounted, watch } from 'vue';
+import { ref, computed, onMounted, watch } from 'vue';
 import { ScatterChart } from 'vue-chart-3';
 import { Chart, registerables } from "chart.js";
-import { shuffle, groupBy, sumBy } from 'lodash';
 import { fetchFrame } from "@/stores/api";
-import moment from "moment";
+import { groupBy } from 'lodash';
 
 Chart.register(...registerables);
 
-interface FrameData {
-  count: number;
-  frameId: number;
-  frameTime: number;
-  instanceId: string;
-  systemDate: string;
-  systemTimestamp: number;
-}
-
+/* ===== Reactive 변수 ===== */
+interface FrameData {count: number;frameId: number;frameTime: number;instanceId: string;systemDate: number[];systemTimestamp: number;}
 const scatterRef = ref<InstanceType<typeof ScatterChart> | null>(null);
 const frameData = ref<FrameData[]>([]);
 
-// Chart Data
-const testData = computed(() => ({
-  labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],
+/* ===== Life Cycle Hooks ===== */
+onMounted(() => {
+  setData();
+});
+
+/* ===== Render Events ===== */
+function handleChartRender(chart: any) {
+  console.log(chart);
+}
+
+/* ===== Rest API에서 데이터 받아오기 ===== */
+const setData = async () => {
+  console.log("===== Data Fetch 완료 =====")
+
+  try {
+    frameData.value = await fetchFrame();
+    console.log("Original frameData length:", frameData.value.length);
+    console.log("데이터 원본 검증: ", frameData.value);
+    console.log("시간 데이터 배열 확인: ", frameData.value.map(frame => getMinutesFromSystemDate(frame.systemDate)));
+    console.log("최소 카운트: ", minCount.value);
+    console.log("최대 카운트: ", maxCount.value);
+  } catch (error) {
+    console.error('데이터를 가져오는 중 오류 발생:', error);
+  }
+};
+
+/* ===== Fetch된 데이터를 동일한 값의 systemDate를 기준으로 Grouping ===== */
+const groupedByKey = computed(() => groupBy(frameData.value, frame => frame.systemDate));
+
+/* ===== 각각의 그룹화된 그룹에서 최대 count 값을 반환하는 배열을 생성 ===== */
+const maxCounts = computed(() => {
+  return Object.values(groupedByKey.value).map(groupedFrames => {
+    return groupedFrames.reduce((max, currentFrame) => {
+      return currentFrame.count > max.count ? currentFrame : max;
+    }).count;
+  });
+});
+
+/* ===== Computed ===== */
+const maxCount = computed(() => Math.max(...maxCounts.value));
+const minCount = computed(() => Math.min(...maxCounts.value));
+
+/* ===== 시간과 분을 문자열 형태로 반환 ===== */
+const getMinutesFromSystemDate = (systemDate: number[]): string => {
+  const [, , , , minute, second] = systemDate;
+  return `${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
+};
+
+/* ===== Chart Data =====*/
+const chartData = computed(() => ({
   datasets: [
     {
-      data: frameData.value.map(frame => ({ x : moment(frame.systemDate, 'EEE MMM dd HH:mm:ss yyyy').format('MM/DD/YYYY HH:mm'), y : frame.count })),
+      label: "Security Event",
+      data: frameData.value.map((frame, index) => ({
+        x: getMinutesFromSystemDate(frame.systemDate),
+        y: maxCounts.value[index] // 이 부분은 maxCounts에서 y 값을 가져옴
+      })),
       backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
     },
   ],
 }));
 
-// const groupedByMinutes = computed(() =>
-//     groupBy(frameData.value, (data) => moment(data.systemDate, 'EEE MMM dd HH:mm:ss yyyy').minutes())
-// );
-//
-// const aggregatedData = computed(() => {
-//   return Object.entries(groupedByMinutes.value).map(([minute, dataGroup]) => {
-//     return {
-//       x: parseInt(minute),
-//       y: sumBy(dataGroup, 'count')
-//     };
-//   });
-// });
-//
-// // Chart Data
-// const testData = computed(() => ({
-//   labels: ['Paris', 'Nîmes', 'Toulon', 'Perpignan', 'Autre'],
-//   datasets: [
-//     {
-//       data: aggregatedData.value,
-//       backgroundColor: ['#77CEFF', '#0079AF', '#123E6B', '#97B0C4', '#A5C8ED'],
-//     },
-//   ],
-// }));
-
-// Chart Options
-const options = ref({
+/* ===== Chart Options ===== */
+const chartOptions = ref({
   responsive: true,
+  maintainAspectRatio: false, // 차트의 비율을 고정하지 않음
+  aspectRatio: 1, // 비율을 1:1로 설정
   plugins: {
+    tooltip: {
+      callbacks: {
+        title: function(tooltipItems) {
+          const dataIndex = tooltipItems[0]?.index;
+          if (typeof dataIndex !== 'undefined') {
+            const systemDate = frameData.value[dataIndex].systemDate;
+            const [year, month, day, hour, minute] = systemDate;
+            return `${year}-${month}-${day} ${hour}:${minute}`;
+          }
+          return '';
+        },
+        label: function(tooltipItems) {
+          const dataIndex = tooltipItems?.index;
+          if (typeof dataIndex !== 'undefined') {
+            const count = frameData.value[dataIndex].count;
+            return `Count: ${count}`;
+          }
+          return '';
+        }
+      }
+    },
     legend: {
       position: 'top',
     },
@@ -77,18 +124,15 @@ const options = ref({
       text: 'Cvedia Events',
     },
   },
-
   // Time Scales
   scales: {
     // x축 System Date 시간 포맷 설정
     x: {
-      type: 'linear',
-      min: 0,
-      max: 59, // 분의 최대 값
+      type: 'category',
       title: {
         display: true,
-        text: 'Minutes'
-      }
+        text: 'Seconds'
+      },
     },
     // y축 Count 포맷 설정
     y: {
@@ -96,6 +140,8 @@ const options = ref({
         display: true,
         text: 'Count'
       },
+      min: minCount,
+      max: maxCount,
       ticks: {
         stepSize: 1,
         beginAtZero: true
@@ -104,29 +150,9 @@ const options = ref({
   }
 });
 
-// Rest API에서 데이터 받아오기
-const setData = async () => {
-  try {
-    frameData.value = await fetchFrame();
-  } catch (error) {
-    console.error('데이터를 가져오는 중 오류 발생:', error);
-  }
-};
-
-// Render Events
-function handleChartRender(chart: any) {
-  console.log(chart);
-}
-
-// Life Cycle Hooks
-onMounted(() => {
-  setData().then(() => {
-    scatterRef.value?.chartInstance.update();
-  });
-});
-
-// Watcher
+/* ===== Watcher ===== */
 watch(frameData, (newData) => {
+  console.log('frameData 변경 감지: ', newData);
   if (newData.length > 0) {
     scatterRef.value?.update();
   }
