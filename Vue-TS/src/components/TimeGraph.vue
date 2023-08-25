@@ -86,10 +86,13 @@ const chartData = computed(() => {
       return currentFrame.count > max.count ? currentFrame : max;
     }).count;
 
+    const firstFrameId = framesForThisTime[0].frameId;
+    const lastFrameId = framesForThisTime[framesForThisTime.length - 1].frameId;
+
     return {
       x: timeKey,
       y: maxCountForThisTime,
-      frameId: framesForThisTime[0].frameId
+      frameId: `${firstFrameId}-${lastFrameId}`
     };
   });
 
@@ -115,15 +118,20 @@ const chartOptions = ref({
   aspectRatio: 1, // 비율을 1:1로 설정
   plugins: {
     tooltips: {
+      enabled: true,
       callbacks: {
         title: function() {
           return 'Frame ID';
         },
-        label: function(tooltipItem, data) {
-          const dataIndex = tooltipItem.index;
-          if (typeof dataIndex !== 'undefined') {
-            const frameId = data.datasets[tooltipItem.datasetIndex].data[dataIndex].frameId;
-            return `Frame ID: ${frameId}`;
+        label: function(tooltipItem: any, data: any) {
+          const dataIndex = tooltipItem.datasetIndex;
+          const datasetIndex = tooltipItem.datasetIndex;
+
+          if (typeof dataIndex !== 'undefined' && typeof datasetIndex !== 'undefined') {
+            const frameIdRange = data.datasets[datasetIndex].data[dataIndex]?.frameId;
+            if (frameIdRange) {
+              return `Frame ID: ${frameIdRange}`;
+            }
           }
           return '';
         }
