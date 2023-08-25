@@ -74,7 +74,7 @@ _Frontend_
 
 **Frontend**
 - [Vite 기반 Vue 3 Composition + TypeScript 프로젝트 세팅](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Vue/Setup.md)
-- [Chart.js - 차트 구현](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Vue/Chart.md)
+- [Chart.js: Scatter Chart 구현](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Vue/Chart.md)
 
 ---
 
