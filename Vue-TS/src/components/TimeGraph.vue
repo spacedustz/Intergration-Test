@@ -1,9 +1,9 @@
 <!-- Chart Instance 접근 방법 = scatterRef.value?.chartInstance.toBase64Image(); -->
 <template>
   <div>
-    <h2 align="center">Scatter Chart</h2>
+    <h2 align="center">Line Chart</h2>
     <div style="overflow: auto; max-width: 1000px; max-height: 800px;">
-      <ScatterChart
+      <LineChart
           v-if="frameData && frameData.length"
           ref="scatterRef" :chartData="chartData"
           :options="chartOptions"
@@ -14,7 +14,7 @@
 
 <script lang="ts" setup>
 import { ref, computed, onMounted, watch } from 'vue';
-import { ScatterChart } from 'vue-chart-3';
+import { LineChart } from 'vue-chart-3';
 import { Chart, registerables } from "chart.js";
 import { fetchFrame } from "@/stores/api";
 import { groupBy } from 'lodash';
@@ -23,7 +23,7 @@ Chart.register(...registerables);
 
 /* ===== Reactive 변수 ===== */
 interface FrameData {count: number;frameId: number;frameTime: number;instanceId: string;systemDate: number[];systemTimestamp: number;}
-const scatterRef = ref<InstanceType<typeof ScatterChart> | null>(null);
+const scatterRef = ref<InstanceType<typeof LineChart> | null>(null);
 const frameData = ref<FrameData[]>([]);
 
 /* ===== Life Cycle Hooks ===== */
@@ -98,7 +98,11 @@ const chartData = computed(() => {
       {
         label: "Security Event",
         data: dataPoints,
-        backgroundColor: ['lightblue', 'green', 'red', 'yellow', 'black'],
+        backgroundColor: ['lightblue', 'red', 'green'],
+        pointRadius: 1.5, // 점의 반지름 옵션
+        showLine: true, // 선을 그리는 옵션
+        borderColor: 'gray', // 선의 색깔
+        borderWidth: 1 // 선의 굵기
       },
     ],
   };

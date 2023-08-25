@@ -52,106 +52,88 @@ DTO, Service, Repository, Entity 들도 작성했으나 글에선 건너뜁니�
 지금은 단순하게 로컬의 파일을 읽어 파싱 후 Rest API로 내보낼 뿐이지만, 나중에 Spring Batch를 사용하여 주기적으로 데이터를 변환해보겠습니다.
 
 ```java
-@Component
-@RequiredArgsConstructor
-public class Parser {
-   private final FrameRepository frameRepository;
-   private final Logger log = LoggerFactory.getLogger(Parser.class);
-
-   /**
-    * 변환, 리스트 저장 실패 시 트랜잭션 롤백  
-    */
-   @PostConstruct
-   @Transactional
-   public void initData() {
-      // 임시로 로컬에서 CSV를 읽어옴  
-      Resource resource = new ClassPathResource("sample/test.csv");
-
-      try {
-         List<String> lines = Files.readAllLines(Paths.get(resource.getFile().getPath()), StandardCharsets.UTF_8);
-         List<Frame> list = new ArrayList<>();
-
-         // CSV의 첫 행은 헤더이기 때문에 0번쨰 인덱스 스킵  
-         for (int i=1; i<lines.size(); i++) {
-            String[] split = lines.get(i).split(",");
-
-            // CSV 파일의 값중 String이 아닌 값들의 타입 변환 준비  
-            int count;
-            float frameTime;
-            long systemTimestamp;
-            LocalDateTime systemDate;
-            DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss yyyy", Locale.ENGLISH);
-            String dateString = split[4];
-
-            try {
-               // Count 변환  
-               count = Integer.parseInt(split[0]);
-
-               // Frame Time 변환  
-               Float frameValue = Float.parseFloat(split[2]);
-               frameTime = Float.parseFloat((String.format("%.4f", frameValue))); // 소수점 4자리 까지만  
-
-               // System TimeStamp 변환  
-               systemTimestamp = Long.parseLong(split[5]);
-
-               // System Date 날짜 변환  
-               systemDate = LocalDateTime.parse(dateString, dateFormat);
-            } catch (Exception e) {
-               log.error("CSV 데이터 변환 실패");
-               throw new CommonException("DATA-003", HttpStatus.BAD_REQUEST);
-            }
-
-            // Entity 생성  
-            Frame frame = Frame.createOf(
-                    count,
-                    frameTime,
-                    split[3],
-                    systemDate,
-                    systemTimestamp
-            );
-
-            list.add(frame);
-         }
-
-         // 리스트에 Entity 추가  
-         try {
-            frameRepository.saveAll(list);
-         } catch (Exception e) {
-            log.error("Entity List 저장 실패");
-            throw new CommonException("DATA-002", HttpStatus.BAD_REQUEST);
-         }
-
-      } catch (IOException e) {
-         log.error("데이터 파싱 실패");
-         throw new CommonException("DATA-001", HttpStatus.BAD_REQUEST);
-      }
-   }
+@Component  
+@RequiredArgsConstructor  
+public class Parser {  
+    private final FrameRepository frameRepository;  
+    private final Logger log = LoggerFactory.getLogger(Parser.class);  
+  
+    /**  
+     * 변환, 리스트 저장 실패 시 트랜잭션 롤백  
+     */  
+    @PostConstruct  
+    @Transactional    
+    public void initData() {  
+        // 임시로 로컬에서 CSV를 읽어옴  
+        Resource resource = new ClassPathResource("sample/test.csv");  
+  
+        try {  
+            List<String> lines = Files.readAllLines(Paths.get(resource.getFile().getPath()), StandardCharsets.UTF_8);  
+            List<Frame> list = new ArrayList<>();  
+  
+            // CSV의 첫 행은 헤더이기 때문에 0번쨰 인덱스 스킵  
+            for (int i=1; i<lines.size(); i++) {  
+                String[] split = lines.get(i).split(",");  
+  
+                // CSV 파일의 값중 String이 아닌 값들의 타입 변환 준비  
+                int count;  
+                float frameTime;  
+                long systemTimestamp;  
+                LocalDateTime systemDate;  
+                DateTimeFormatter dateFormat = DateTimeFormatter.ofPattern("EEE MMM dd HH:mm:ss yyyy", Locale.ENGLISH);  
+                String dateString = split[4];  
+  
+                try {  
+                    // Count 변환  
+                    count = Integer.parseInt(split[0]);  
+  
+                    // Frame Time 변환  
+                    Float frameValue = Float.parseFloat(split[2]);  
+                    frameTime = Float.parseFloat((String.format("%.4f", frameValue))); // 소수점 4자리 까지만  
+  
+                    // System TimeStamp 변환  
+                    systemTimestamp = Long.parseLong(split[5]);  
+  
+                    // System Date 날짜 변환  
+                    systemDate = LocalDateTime.parse(dateString, dateFormat);  
+                } catch (Exception e) {  
+                    log.error("CSV 데이터 변환 실패");  
+                    throw new CommonException("DATA-003", HttpStatus.BAD_REQUEST);  
+                }  
+  
+                // Entity 생성  
+                Frame frame = Frame.createOf(  
+                        count,  
+                        frameTime,  
+                        split[3],  
+                        systemDate,  
+                        systemTimestamp  
+                );  
+  
+                list.add(frame);  
+            }  
+  
+            // 리스트에 Entity 추가  
+            try {  
+                frameRepository.saveAll(list);  
+            } catch (Exception e) {  
+                log.error("Entity List 저장 실패");  
+                throw new CommonException("DATA-002", HttpStatus.BAD_REQUEST);  
+            }  
+  
+        } catch (IOException e) {  
+            log.error("데이터 파싱 실패");  
+            throw new CommonException("DATA-001", HttpStatus.BAD_REQUEST);  
+        }  
+    }  
 }
 ```
 
 ---
 
-## Scatter Chart 구현해보기
+## Scatter/Line Chart 구현해보기
 
-🙃 시간 데이터를 다루다가 뭔가 자꾸 이상한 값으로 변하길래 알아보다가 발견한 아주 좋은 글
-
-[자바스크립트 기반에서 Date 타입을 다루는 법](https://yozm.wishket.com/magazine/detail/1695/)
-
-<br>
-
-날짜 관련 데이터를 출력하려면 라이브러리를 설치해야 합니다.
-
-```
-npm install moment chartjs-adapter-moment
-```
-
-<br>
-
-그리고, main.ts 파일에 import 해주면 Chart.js가 자동으로 사용하게 됩니다.
-
-```ts
-import 'chartjs-adapter-moment';
-```
+**☆ Scatter Chart를 쓰다가 선을 그리기 위해 Line Chart로 변경했습니다. ★**
 
 <br>
 
@@ -167,17 +149,17 @@ v-if를 통해 차트가 렌더링 되기 전 데이터가 들어오지 않는�
 
 ```html
 <!-- Chart Instance 접근 방법 = scatterRef.value?.chartInstance.toBase64Image(); -->
-<template>
-   <div>
-      <h2 align="center">Scatter Chart</h2>
-      <div style="overflow: auto; max-width: 1000px; max-height: 800px;">
-         <ScatterChart
-                 v-if="frameData && frameData.length"
-                 ref="scatterRef" :chartData="chartData"
-                 :options="chartOptions"
-                 @chart:render="handleChartRender" />
-      </div>
-   </div>
+<template>  
+  <div>  
+    <h2 align="center">Scatter Chart</h2>  
+    <div style="overflow: auto; max-width: 1000px; max-height: 800px;">  
+      <LineChart   
+v-if="frameData && frameData.length"   
+ref="scatterRef" :chartData="chartData"   
+:options="chartOptions"   
+@chart:render="handleChartRender" />  
+    </div>  
+  </div>  
 </template>
 ```
 
@@ -211,7 +193,7 @@ v-if를 통해 차트가 렌더링 되기 전 데이터가 들어오지 않는�
 ```ts
 <script lang="ts" setup>  
 import { ref, computed, onMounted, watch } from 'vue';  
-import { ScatterChart } from 'vue-chart-3';  
+import { LineChart } from 'vue-chart-3';  
 import { Chart, registerables } from "chart.js";  
 import { fetchFrame } from "@/stores/api";  
 import { groupBy } from 'lodash';  
@@ -294,7 +276,11 @@ const getMinutesFromSystemDate = (systemDate: number[]): string => {
       {  
         label: "Security Event",  
         data: dataPoints,  
-        backgroundColor: ['lightblue', 'green', 'red', 'yellow', 'black'],  
+        backgroundColor: ['lightblue', 'red', 'green'],
+        pointRadius: 1.5, // 점의 반지름 옵션  
+		showLine: true, // 선을 그리는 옵션  
+		borderColor: 'gray', // 선의 색깔  
+		borderWidth: 1 // 선의 굵기
       },  
     ],  
   };  
@@ -378,11 +364,23 @@ watch(frameData, (newData) => {
 
 <br>
 
+**Scatter Chart**
+
 ![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/scatter.png)
 
 <br>
 
-😲
+**선을 그리기 위해 Line Chart로 변경**
+
+![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/line.png)
+
+<br>
+
+😲 시간 데이터를 다루다가 뭔가 자꾸 이상한 값으로 변하길래 알아보다가 발견한 아주 좋은 글
+
+[자바스크립트 기반에서 Date 타입을 다루는 법](https://yozm.wishket.com/magazine/detail/1695/)
+
+<br>
 
 내용 추가 중..
 
