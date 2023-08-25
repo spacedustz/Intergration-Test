@@ -52,8 +52,8 @@ const setData = async () => {
   }
 };
 
-/* ===== Fetch된 데이터를 동일한 값의 systemDate를 기준으로 Grouping ===== */
-const groupedByKey = computed(() => groupBy(frameData.value, frame => frame.systemDate));
+/* ===== Fetch된 데이터를 동일한 값의 systemDate를 기준으로 systemDate의 문자열 기준 Grouping ===== */
+const groupedByKey = computed(() => groupBy(frameData.value, frame => getMinutesFromSystemDate(frame.systemDate)));
 console.log('길이 ㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇㅇ', groupedByKey.value.length)
 
 /* ===== 각각의 그룹화된 그룹에서 최대 count 값을 반환하는 배열을 생성 ===== */
@@ -75,20 +75,34 @@ const getMinutesFromSystemDate = (systemDate: number[]): string => {
   return `${String(minute).padStart(2, '0')}:${String(second).padStart(2, '0')}`;
 };
 
-/* ===== Chart Data =====*/
-const chartData = computed(() => ({
-  datasets: [
-    {
-      label: "Security Event",
-      data: frameData.value.map((frame, index) => ({
-        x: getMinutesFromSystemDate(frame.systemDate),
-        y: maxCounts.value[index], // 이 부분은 maxCounts에서 y 값을 가져옴
-        frameId: frame.frameId
-      })),
-      backgroundColor: ['lightblue', 'green', 'red', 'yellow', 'black'],
-    },
-  ],
-}));
+/* ===== Chart Data =====
+ * x값 : groupedByKey의 키(시간 문자열)을 돌면서 최대 Count값을 찾아서 x에 할당
+ * y값 : 각 그룹의 최대 Count 수
+ */
+const chartData = computed(() => {
+  const dataPoints = Object.keys(groupedByKey.value).map((timeKey) => {
+    const framesForThisTime = groupedByKey.value[timeKey];
+    const maxCountForThisTime = framesForThisTime.reduce((max, currentFrame) => {
+      return currentFrame.count > max.count ? currentFrame : max;
+    }).count;
+
+    return {
+      x: timeKey,
+      y: maxCountForThisTime,
+      frameId: framesForThisTime[0].frameId
+    };
+  });
+
+  return {
+    datasets: [
+      {
+        label: "Security Event",
+        data: dataPoints,
+        backgroundColor: ['lightblue', 'green', 'red', 'yellow', 'black'],
+      },
+    ],
+  };
+});
 
 /* ===== Chart Options ===== */
 const chartOptions = ref({
