@@ -1,13 +1,32 @@
-import React from "react";
+import React, { useRef } from "react";
+import Reactive from "../models/data";
+import ReactiveFCItem from "./ReactiveFCItem";
 
-const Item: React.FC<{ items: string[] }> = (props) => {
+// Version 1
+const Item: React.FC<{ items: Reactive[] }> = (props) => {
     return (
         <ul>
-            {props.items.map((item, index) =>
-                <li key={index}>{item}</li>,
+            {props.items.map((item) =>
+                <ReactiveFCItem key={item.id} text={item.text} />
             )}
         </ul>
     )
 }
 
-export default Item;
+// Version2
+const Item2 = () => {
+    // Browser Default 방지
+    const submitHandler = (event: React.FormEvent) => {
+        event.preventDefault();
+    };
+
+    const inputRef = useRef<>();
+
+    return <form onSubmit={submitHandler}>
+        <label htmlFor="text">Text Here</label>
+        <input type="text" id="text" ref={inputRef} />
+        <button>Add Item</button>
+    </form>
+}
+
+export default { Item, Item2 };
