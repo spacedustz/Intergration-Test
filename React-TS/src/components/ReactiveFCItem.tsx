@@ -1,8 +1,8 @@
 import React from "react";
 
-const Item: React.FC<{text: string}> = (props) => {
+const Item: React.FC<{text: string; onRemoveItem: () => void}> = (props) => {
 
-    return <li>{props.text}</li>
+    return <li onClick={props.onRemoveItem}>{props.text}</li>
 }
 
 export default Item;
