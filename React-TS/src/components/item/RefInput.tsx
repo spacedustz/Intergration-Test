@@ -19,7 +19,7 @@ const Input: React.FC = () => {
             return;
         }
 
-        context.onAddItem(enteredText);
+        context.addItem(enteredText);
     };
 
     return <form onSubmit={submitHandler}>
