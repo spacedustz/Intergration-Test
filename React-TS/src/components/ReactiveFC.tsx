@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import Reactive from "../models/data";
 import ReactiveFCItem from "./ReactiveFCItem";
 
@@ -13,20 +13,4 @@ const Item: React.FC<{ items: Reactive[] }> = (props) => {
     )
 }
 
-// Version2
-const Item2 = () => {
-    // Browser Default 방지
-    const submitHandler = (event: React.FormEvent) => {
-        event.preventDefault();
-    };
-
-    const inputRef = useRef<>();
-
-    return <form onSubmit={submitHandler}>
-        <label htmlFor="text">Text Here</label>
-        <input type="text" id="text" ref={inputRef} />
-        <button>Add Item</button>
-    </form>
-}
-
-export default { Item, Item2 };
+export default { Item };
