@@ -82,7 +82,7 @@ _Frontend_
 **📂Directory📂** -> React-TS, TypeScript
 
 **React**
-- [React 핵심 정리 (진행 중)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Summary.md)
+- [React 핵심 정리 Summary (진행 중)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Summary.md)
 
 <br>
 
