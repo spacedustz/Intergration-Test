@@ -3,7 +3,7 @@ server:
     encoding:
       charset: UTF-8
       force-response: true
-  port: 8081
+  port: 8080
 
 spring:
   h2:
