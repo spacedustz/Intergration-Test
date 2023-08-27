@@ -81,8 +81,12 @@ _Frontend_
 ## 2. React & TypeScript 학습 (진행 중)
 **📂Directory📂** -> React-TS, TypeScript
 
+**React**
 - [React 핵심 정리 (진행 중)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Summary.md)
 
+<br>
+
+**TypeScript**
 - [TypeScript 환경 세팅](https://github.com/spacedustz/Intergration-Test/blob/main/Description/TypeScript/Setup.md)
 - [TypeScript 총정리 Summary (업데이트 중)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/TypeScript/Summary.md)
 - [Object 클래스 (모르는거 생길때마다 추가)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/TypeScript/Object.md)
