@@ -1,6 +1,9 @@
-import React, {useRef} from "react";
+import React, {useRef, useContext} from "react";
+import {MainContext} from "../context/MainContext";
 
-const Input: React.FC<{onAddItem: (enteredText: string) => void}> = (props) => {
+const Input: React.FC = () => {
+    const context = useContext(MainContext);
+
     // Input Ref
     const inputRef = useRef<HTMLInputElement>(null);
 
@@ -16,7 +19,7 @@ const Input: React.FC<{onAddItem: (enteredText: string) => void}> = (props) => {
             return;
         }
 
-        props.onAddItem(enteredText);
+        context.onAddItem(enteredText);
     };
 
     return <form onSubmit={submitHandler}>
