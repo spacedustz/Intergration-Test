@@ -12,7 +12,7 @@ const Item: React.FC = () => {
                 <ReactiveFCItem
                     key={item.id}
                     text={item.text}
-                    onRemoveItem={context.onRemoveItem.bind(null, item.id)}
+                    onRemoveItem={context.removeItem.bind(null, item.id)}
                 />
             )}
         </ul>
