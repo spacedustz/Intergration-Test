@@ -7,7 +7,7 @@ A repository for All Types of Implementation Tests
 
 ---
 
-## 1. 실시간 반응형 통계 데이터 시각화 (진행 중)
+## 1. 실시간 반응형 통계 데이터 시각화 (진행 중 -> 중단 (reason: Vue에서 React로 변경)
 
 **📂Directory📂** -> Converter, Vue-TS
 
