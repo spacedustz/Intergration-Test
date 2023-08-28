@@ -82,7 +82,13 @@ _Frontend_
 **📂Directory📂** -> React-TS, TypeScript
 
 **React**
-- [React 핵심 정리 Summary (진행 중)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Summary.md)
+- [React 핵심 총 정리 Summary (진행 중)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Summary.md)
+- [1. Project Setting](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/1-Setup.md)
+- [2. 함수형 컴포넌트 & Props](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/2-Props.md)
+- [3. Ref & State & Event](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/3-Ref-State-Event.md)
+- [4. Effect & Memo](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/4-Effect-Memo.md)
+- [5. Callback](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/5-Callback.md)
+- [6. Recuder](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/6-Reducer.md)
 
 <br>
 
