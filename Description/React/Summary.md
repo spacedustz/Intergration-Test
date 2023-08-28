@@ -87,6 +87,18 @@ npx tsc [파일명].ts
 
 Linting 부분에`"allowSyntheticDefaultImports": true`를  사용하면, 기본적으로 default export가 없는 모듈에서도 default import를 허용합니다.
 
+<br>
+
+**추가된 패키지 (필요한 패키지가 생길 때마다 추가 중)**
+
+- axios
+- @types/node @types/react @types/react-dom @types/jest
+- eslint
+- chart.js & react-chartjs-2
+- lodash @types/lodash
+- chartjs-adapter-moment
+- @reduxjs/toolkit react-redux @types/react-redux
+
 ---
 
 ## Functional Component & Props
@@ -136,11 +148,39 @@ export default App
 
 ---
 
-## Ref & State & Event
+## useRef & useState & Event
 
-Ref는 기본적으로 제네릭 타입이며 모든 종류의 데이터와 HTML 객체를 사용할 수 있습니다.
+> **useRef**()
 
-TypeScript에서는 `Ref`를 생성하고 `제네릭에 타입을 꼭 명시해야 합니다.`
+- 함수형 컴포넌트에서 이를 설정 할 때 `useRef` 를 사용하여 설정하는 기능,
+- 특정 DOM을 선택할때에도 `useRef`를 사용할 수 있습니다. (ex: 입력칸을 제출하고 화면 포커싱을 다시 입력칸으로 이동시키기)
+- TypeScript에서는 `Ref`를 생성하고 `제네릭에 타입을 꼭 명시해야 합니다.`
+
+<br>
+
+`useRef` Hook 은 DOM 을 선택하는 용도 외에도, 다른 용도가 한가지 더 있는데요, 바로, 컴포넌트 안에서 조회 및 수정 할 수 있는 변수를 관리하는 것 입니다.
+
+**`useRef` 로 관리하는 변수는 값이 바뀐다고 해서 컴포넌트가 리렌더링되지 않습니다.**
+
+리액트 컴포넌트에서의 상태는 상태를 바꾸는 함수를 호출하고 나서 그 다음 렌더링 이후로 업데이트 된 상태를 조회 할 수 있는 반면, `useRef` 로 관리하고 있는 변수는 설정 후 바로 조회 할 수 있습니다.
+
+이 변수를 사용하여 다음과 같은 값을 관리 할 수 있습니다.
+
+- `setTimeout`, `setInterval` 을 통해서 만들어진 `id`
+- 외부 라이브러리를 사용하여 생성된 인스턴스
+- scroll 위치
+
+<br>
+
+> **useState**() - `useState`는 컴포넌트의 상태를 관리하는 Hook입니다.
+
+```tsx
+const [num, setNum] = useState(0);
+```
+
+`useState`를 사용하는 방법은, 상태의 기본값을 넣어서 호출해주고 배열을 반환합니다..
+
+첫번째 배열의 원소는 **현재 상태**, 두번째 원소는 **Setter 함수**입니다.
 
 <br>
 
@@ -386,11 +426,11 @@ App.tsx에 있던 핸들러와 아이템 삭제 함수 등을 전부 `ContextPro
 
 3. `ContextProvider`: 이 함수형 컴포넌트는 상태와 이벤트 핸들러를 관리하고, 해당 값을 컨텍스트로 제공합니다.
 
-    - 상태: 초기값으로 빈 배열인 `item`과 함께 useState 훅을 사용하여 선언됩니다.
-    - 아이템 추가 핸들러(`addItemHandler`): 새로운 아이템을 생성한 후, 이전 상태 배열에 새로운 아이템을 추가하는 방식으로 상태 업데이트가 이루어집니다.
-    - 아이템 삭제 핸들러(`removeItemHandler`): 주어진 아이디와 일치하지 않는 모든 아이템만 남기고 필터링하여 상태 업데이트가 이루어집니다.
-    - contextValue: 위에서 정의한 ContextObject 타입에 따라 현재 상태와 핸들러 함수들을 포함하는 객체입니다.
-    - `<MainContext.Provider>`: contextValue 값을 MainContext.Provider의 value 속성에 전달하여 자식 컴포넌트에서 해당 값에 액세스할 수 있도록 합니다.
+   - 상태: 초기값으로 빈 배열인 `item`과 함께 useState 훅을 사용하여 선언됩니다.
+   - 아이템 추가 핸들러(`addItemHandler`): 새로운 아이템을 생성한 후, 이전 상태 배열에 새로운 아이템을 추가하는 방식으로 상태 업데이트가 이루어집니다.
+   - 아이템 삭제 핸들러(`removeItemHandler`): 주어진 아이디와 일치하지 않는 모든 아이템만 남기고 필터링하여 상태 업데이트가 이루어집니다.
+   - contextValue: 위에서 정의한 ContextObject 타입에 따라 현재 상태와 핸들러 함수들을 포함하는 객체입니다.
+   - `<MainContext.Provider>`: contextValue 값을 MainContext.Provider의 value 속성에 전달하여 자식 컴포넌트에서 해당 값에 액세스할 수 있도록 합니다.
 4. ContextProvider 내보내기: ContextProvider 컴포넌트를 외부에서 임포트할 수 있도록 내보냅니다.
 
 
@@ -523,4 +563,122 @@ const Input: React.FC = () => {
 }  
   
 export default Input;
+```
+
+---
+
+## useEffect
+
+`useEffect`는 마운트/언마운트/업데이트 시 할 작업을 설정할 수 있는 LifeCycle Hook입니다.
+
+`useEffect`는 2개의 파라미터를 받습니다.
+
+- 1번 파라미터 : 함수(effect)
+- 2번 파라미터 : 배열(deps)
+
+<br>
+
+1번째 파라미터는 단순히 실행시킬 함수를 등록하면 됩니다.
+
+2번쨰 파라미터인 배열이 **빈 배열이라면 컴포넌트가 마운트 될 시 에만 적용**이 됩니다.
+
+```tsx
+useEffect(() => {
+	// 1. 실행할 함수,
+	// 2. 빈 배열
+});
+```
+
+<br>
+
+그리고 **배열에 특정 배열을 넣을 경우**, 해당 배열이 업데이트 될 때만 1번째 파라미터인 함수가 실행됩니다.
+
+```tsx
+useEffect(() => {
+	// 1. 실행할 함수,
+	// 2. 특정 배열
+});
+```
+
+<br>
+**※ cleanup 함수**  
+
+- useEffect 안에서 return 할 때 실행 된다.(useEffcet의 뒷정리를 한다.)
+- 만약 컴포넌트가 마운트 될 때 이벤트 리스너를 통해 이벤트를 추가하였다면 컴포넌트가 언마운트 될 때 이벤트를 삭제 해주어야 한다.
+
+그렇지 않으면 컴포넌트가 리렌더링 될 때마다 새로운 이벤트 리스너가 핸들러에 바인딩 될 것이다. 이는 자주 리렌더링 될 경우 메모리 누수가 발생할 수 있다.
+
+```tsx
+useEffect(() => {
+ // 함수 처리부
+ return () => {
+	 // cleanup
+ }
+});
+```
+
+---
+## Redux
+
+리액트에서 리덕스를 사용하기 위해서 필요한 패키지를 먼저 설치합니다. 
+
+```
+npm i @reduxjs/toolkit react-redux
+```
+
+<br>
+
+타입스크립트를 위해서 해당 패키지가 필요하지 않은가 생각할 수 있지만 
+
+react-redux 7.2.3버전부터 해당 패키지를 포함하고 있기 때문에 이후 버전은 설치할 필요가 없습니다.
+
+```
+npm i @types/react-redux
+```
+
+<br>
+
+**Store** 
+
+- 전체 저장소( 상태 ) 가 들어가 있습니다.
+- 하나의 프로젝트는 하나의 스토어를 권장하지만,
+- 필요하다면 여러개도 가능은 합니다. 
+
+**Reducer** 
+
+- 변화를 일으키는,  그리고 초기값을 지정하는 공간입니다.
+- 필요에 따라 여라가지 Reducer가 들어갑니다. 
+
+**Hooks** 
+
+- Dispatch나 Selecter를 쉽게 사용하기 위한 커스텀 훅을 작성할 것입니다. 
+- 이쪽은 Redux관련 Hook만 들어가는 것이 아닌 필요에 따라 다양하게 활용합니다.
+
+<br>
+
+>**Redux 사용해보기**
+
+**store/index.ts**
+
+아직 Reducer를 만들지 않았기 때문에 들어가는 것은 없고, 
+
+RootState와 AppDispatch는 Hooks에서 사용될 Dispatch와 Selector에 사용할 타입입니다.
+
+```tsx
+import { configureStore } from "@reduxjs/toolkit";  
+  
+export const store = configureStore({  
+    reducer: {},  
+});  
+  
+export type RootState = ReturnType<typeof store.getState>;  
+export type AppDispatch = typeof store.dispatch;
+```
+
+<br>
+
+**hooks/index.ts**
+
+```tsx
+
 ```
