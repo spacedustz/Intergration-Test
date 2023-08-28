@@ -373,6 +373,386 @@ export default App
 
 ---
 
+## useEffect
+
+`useEffect`는 마운트/언마운트/업데이트 시 할 작업을 설정할 수 있는 LifeCycle Hook입니다.
+
+`useEffect`는 2개의 파라미터를 받습니다.
+
+- 1번 파라미터 : 함수(effect)
+- 2번 파라미터 : 배열(deps)
+
+<br>
+
+1번째 파라미터는 단순히 실행시킬 함수를 등록하면 됩니다.
+
+2번쨰 파라미터인 배열이 **빈 배열이라면 컴포넌트가 마운트 될 시 에만 적용**이 됩니다.
+
+```tsx
+useEffect(() => {
+	// 1. 실행할 함수,
+	// 2. 빈 배열
+});
+```
+
+<br>
+
+그리고 **배열에 특정 배열을 넣을 경우**, 해당 배열이 업데이트 될 때만 1번째 파라미터인 함수가 실행됩니다.
+
+```tsx
+useEffect(() => {
+	// 1. 실행할 함수,
+	// 2. 특정 배열
+});
+```
+
+<br>
+**※ cleanup 함수**  
+
+- useEffect 안에서 return 할 때 실행 된다.(useEffcet의 뒷정리를 한다.)
+- 만약 컴포넌트가 마운트 될 때 이벤트 리스너를 통해 이벤트를 추가하였다면 컴포넌트가 언마운트 될 때 이벤트를 삭제 해주어야 한다.
+
+그렇지 않으면 컴포넌트가 리렌더링 될 때마다 새로운 이벤트 리스너가 핸들러에 바인딩 될 것이다. 이는 자주 리렌더링 될 경우 메모리 누수가 발생할 수 있다.
+
+```tsx
+useEffect(() => {
+ // 함수 처리부
+ return () => {
+	 // cleanup
+ }
+});
+```
+
+---
+
+## useMemo
+
+`useMemo` - 성능 최적화를 위하여 연산된 값을 `useMemo`라는 Hook 을 사용하여 재사용하는 방법을 알아보도록 하겠습니다.
+
+예를 들어 유저의 필드 중 `active: true` 인 것들만 찾아서 렌더링 한다고 했을때 active 값이 true인 사용자를 찾는 예시를 보겠습니다.
+
+```tsx
+const countActiveUsers(users: User[]): number {
+	console.log('활성화 상태인 사용자 수를 세는중...');
+	return users.filter(user => user.active).length;
+}
+```
+
+위 코드에서 활성 사용자 수를 세는건 users 에 변화가 있을때만 세야되는건데 input 값이 바뀔 때에도
+
+컴포넌트가 리렌더링 되므로 이렇게 불필요할때에도 호출하여서 자원이 낭비되고 있습니다.
+
+<br>
+
+이러한 상황에서 `useMemo`라는 Hook 함수를 사용하여 성능을 최적화 할 수 있습니다.
+
+Memo는 `memoized`를 의미하는데, 이전에 계산한 값을 재사용한다는 의미를 가지고 있습니다.
+
+```tsx
+const countActiveUsers(users: User[]): number {
+	console.log('활성화 상태인 사용자 수를 세는중...');
+	return users.filter(user => user.active).length;
+}
+
+const count = useMemo(() => countActiveUsers(users), [users]);
+```
+
+`useMemo` 의 첫번째 파라미터에는 어떻게 연산할지 정의하는 함수를 넣어주면 됩니다.
+
+두번째 파라미터에는 deps 배열을 넣어주면 되는데 이 배열 안에 넣은 내용이 바뀌면,
+
+등록한 함수를 호출해서 값을 연산해주고, 만약에 내용이 바뀌지 않았다면 이전에 연산한 값을 재사용하게 됩니다.
+
+---
+
+## useCallback
+
+`useCallback`은 `useMemo`와 비슷한 Hook입니다.
+
+`useMemo`는 특정 결과값을 재사용 할 때 사용하는 반면, `useCallback`은 특정 함수를 재사용 하고 싶을 때 사용합니다.
+
+<br>
+
+예시로 아래의 세 함수 `onCreate, onRemove, onToggle`을 보겠습니다.
+
+```tsx
+import React, { useState, useRef } from 'react';  
+  
+interface User {  
+    id: number;  
+    username: string;  
+    email: string;  
+    active?: boolean;  
+}  
+  
+const App: React.FC = () => {  
+    const nextId = useRef(1);  
+    const [users, setUsers] = useState<User[]>([]);  
+    const [inputs, setInputs] = useState({ username: '', email: '' });  
+  
+    const onCreate = () => {  
+        const user: User = {  
+            id: nextId.current,  
+            username: inputs.username,  
+            email: inputs.email  
+        };  
+        setUsers(prevUsers => [...prevUsers, user]);  
+  
+        setInputs({  
+            username: '',  
+            email: ''  
+        });  
+        nextId.current += 1;  
+    };  
+  
+    const onRemove = (id: number) => {  
+        setUsers(prevUsers => prevUsers.filter(user => user.id !== id));  
+    };  
+  
+    const onToggle = (id: number) => {  
+        setUsers(prevUsers =>  
+            prevUsers.map(user =>  
+                user.id === id ? { ...user, active: !user.active } : user  
+            )  
+        );  
+    };  
+  
+    return (  
+        <div>  
+            {/* 컴포넌트 JSX 내용 */}  
+        </div>  
+    );  
+};  
+  
+export default App;
+```
+
+위 함수들은 컴포넌트가 리렌더링 될 때 마다 새로 만들어집니다.
+
+함수를 선언하는 것 자체는 사실 메모리도, CPU 도 리소스를 많이 차지 하는 작업은 아니기 때문에 함수를 새로 선언한다고 해서,
+
+그 자체 만으로 큰 부하가 생길일은 없지만, 한번 만든 함수를 필요할때만 새로 만들고 재사용하는 것은 여전히 중요합니다.
+
+그 이유는, 나중에 컴포넌트에서 `props` 가 바뀌지 않았으면 Virtual DOM 에 새로 렌더링하는 것 조차 하지 않고 컴포넌트의 결과물을 재사용 하는 최적화 작업을 할때 함수를 재사용하는것이 필수입니다.
+
+<br>
+
+useCallback 은 이런식으로 사용합니다.
+
+```tsx
+import React, { useState, useRef, useCallback } from 'react';  
+  
+interface User {  
+    id: number;  
+    username: string;  
+    email: string;  
+    active: boolean;  
+}  
+  
+interface InputValues {  
+    username: string;  
+    email: string;  
+}  
+  
+function App() {  
+
+	// ... 나머지 코드
+
+    const onCreate = useCallback(() => {  
+        const user: User = {  
+            id: nextId.current,  
+            username,  
+            email,  
+            active: true  
+        };  
+        setUsers(prevUsers => prevUsers.concat(user));  
+  
+        setInputs({  
+            username: '',  
+            email: ''  
+        });  
+        nextId.current += 1;  
+    }, [username, email]);  
+  
+    const onRemove = useCallback(  
+        (id: number) => {  
+            setUsers(prevUsers => prevUsers.filter(user => user.id !== id));  
+        },  
+        [users]  
+    );  
+  
+    const onToggle = useCallback(  
+        (id: number) => {  
+            setUsers(prevUsers =>  
+                prevUsers.map(user =>  
+                    user.id === id ? { ...user, active: !user.active } : user  
+                )  
+            );  
+        },  
+        [users]  
+    );  
+  
+    const count = users.filter(user => user.active).length;  
+  
+    return (  
+        <>  
+            {/* 여기에 CreateUser와 UserList 컴포넌트 사용 */}  
+            <div>활성사용자 수 : {count}</div>  
+        </>  
+    );  
+}  
+  
+export default App;
+```
+
+주의할 점은, 함수 안에서 사용하는 상태 혹은 props 가 있다면 꼭, `deps` 배열안에 포함시켜야 된다는 것 입니다.
+
+만약에 `deps` 배열 안에 함수에서 사용하는 값을 넣지 않게 된다면, 함수 내에서 해당 값들을 참조할때 가장 최신 값을 참조 할 것이라고 보장 할 수 없습니다.
+
+props 로 받아온 함수가 있다면, 이 또한 `deps` 에 넣어주어야 해요.
+
+사실, `useCallback` 은 `useMemo` 를 기반으로 만들어졌습니다.
+
+다만, 함수를 위해서 사용 할 때 더욱 편하게 해준 것 뿐이지요. 이런식으로도 표현 할 수 있습니다.
+
+---
+
+## useReducer
+
+지금까지는 `useState`를 사용해 상태관리 로직을 컴포넌트 내부에 사용했었습니다.
+
+`useReducer`를 사용하면 상태 관리 로직을 컴포넌트에서 분리시킬 수 있습니다.
+
+즉, 상태 관리만을 위한 파일에 작성 후, import로 불러와서 사용할 수 있다는 의미입니다.
+
+<br>
+
+> **reducer란?**
+
+`Reducer`란 현재 상태와 액션 객체를 파라미터로 받아와서 새로운 상태를 반환해주는 함수입니다.
+
+reducer 에서 반환하는 상태는 곧 컴포넌트가 지닐 새로운 상태가 됩니다.
+
+여기서 `action` 은 업데이트를 위한 정보를 가지고 있습니다. 주로 `type` 값을 지닌 객체 형태로 사용하지만, 꼭 따라야 할 규칙은 따로 없습니다.
+
+```ts
+type Action =  
+    | { type: 'LOGIN_SUCCESS'; payload: { userId: string } }  
+    | { type: 'LOGIN_FAILURE'; payload: { error: string } };  
+  
+function reducer(state: State, action: Action): State {  
+    switch (action.type) {  
+        case 'LOGIN_SUCCESS':  
+            // 로그인 성공 시 상태 변경 로직  
+            // action.payload.userId를 사용하여 상태를 업데이트  
+            return nextState;  
+  
+        case 'LOGIN_FAILURE':  
+            // 로그인 실패 시 상태 변경 로직  
+            // action.payload.error를 사용하여 상태를 업데이트  
+            return nextState;  
+  
+        default:  
+            return state;  
+    }  
+}
+```
+
+<br>
+
+**`State & Action`**
+
+상태의 타입을 나타내며, `Action`은 가능한 모든 액션의 타입을 나타냅니다.
+
+각 액션에 대한 타입과 payload의 타입을 적절히 정의하여 사용하면 됩니다.
+
+<br>
+
+**`Payload`**
+
+액션 객체 안에 포함되는 데이터를 가리키는 용어입니다.
+
+액션은 어떤 종류의 변화가 일어나야 하는지를 나타내는 객체입니다. 그리고 이 액션에 따라 상태(state)를 업데이트하기 위해 필요한 데이터는 `payload`라는 속성에 담겨집니다.
+
+<br>
+
+예를 들어, 사용자가 로그인하는 액션을 생각해보겠습니다.
+
+이 액션은 로그인 성공 또는 실패에 따라 상태를 업데이트해야 할 것입니다.
+
+<br>
+
+위 예시에서 `payload`는 로그인 성공 시에는 `userId`를, 로그인 실패 시에는 `error`를 담고 있습니다.
+
+액션 타입마다 어떤 데이터가 필요한지에 따라 `payload`의 구조가 다를 수 있습니다.
+
+이를 통해 리듀서는 액션에 따른 적절한 상태 업데이트를 수행하게 됩니다.
+
+<br>
+
+**그럼 이제 Reducer를 알았으니 `useReducer`의 사용법을 알아보겠습니다.**
+
+```ts
+const [state, dispatch] = useReducer(reducer, initialState);  
+```
+
+여기서 `state` 는 컴포넌트에서 사용 할 수 있는 상태를 가르키게 되고, `dispatch` 는 액션을 발생시키는 함수라고 이해하면 됩니다.
+
+이 함수는 다음과 같이 사용합니다: `dispatch({ type: 'INCREMENT' })`.
+
+그리고 `useReducer` 에 넣는 첫번째 파라미터는 reducer 함수이고, 두번째 파라미터는 초기 상태입니다.
+
+```tsx
+import React, { useReducer } from 'react';  
+  
+interface State {  
+    // 상태의 타입 정의  
+}  
+  
+type Action =  
+    | { type: 'ACTION_TYPE_1'; payload: /* payload의 타입 */ }  
+    | { type: 'ACTION_TYPE_2'; payload: /* payload의 타입 */ }  
+// 다른 액션들 추가  
+  
+function reducer(state: State, action: Action): State {  
+    switch (action.type) {  
+        case 'ACTION_TYPE_1':  
+            // ACTION_TYPE_1에 따른 상태 변경 로직  
+            // const nextState = ...  
+            return nextState;  
+  
+        case 'ACTION_TYPE_2':  
+            // ACTION_TYPE_2에 따른 상태 변경 로직  
+            // const nextState = ...  
+            return nextState;  
+  
+        // 다른 case 추가  
+  
+        default:  
+            return state;  
+    }  
+}  
+  
+const initialState: State = {  
+    // 초기 상태 값  
+};  
+  
+const YourComponent: React.FC = () => {  
+    const [state, dispatch] = useReducer(reducer, initialState);  
+  
+    // ... 컴포넌트의 나머지 코드 ...  
+    return (  
+        <div>  
+            {/* 컴포넌트 JSX 내용 */}  
+        </div>  
+    );  
+};  
+  
+export default YourComponent;
+```
+
+---
+
 ## Context API
 
 React에서 Context API란 상위 컴포넌트에서 하위 컴포넌트로 데이터를 전달하기 위한 메커니즘을 제공합니다.
@@ -439,57 +819,57 @@ App.tsx에 있던 핸들러와 아이템 삭제 함수 등을 전부 `ContextPro
 MainContext.Provider 하위에 있는 자식 컴포넌트에서 useContext(MainContext) 훅을 사용하여 items 배열과 addItem, removeItem 함수에 액세스할 수 있습니다.
 
 ```tsx
-import React, {useState} from 'react';  
-import Reactive from "../../models/data";  
-  
-type ContextObject = {  
-    items: Reactive[];  
-    addItem: (text: string) => void;  
-    removeItem: (id: string) => void;  
-}  
-  
+import React, {useState} from 'react';
+import Reactive from "../../models/data";
+
+type ContextObject = {
+   items: Reactive[];
+   addItem: (text: string) => void;
+   removeItem: (id: string) => void;
+}
+
 // Context Hook을 위해 export 필요  
-export const MainContext = React.createContext<ContextObject>({  
-    items: [],  
-    addItem: () => {},  
-    removeItem: () => {}  
-});  
-  
+export const MainContext = React.createContext<ContextObject>({
+   items: [],
+   addItem: () => {},
+   removeItem: () => {}
+});
+
 // Context의 요소를 구성하는 함수형 컴포넌트, Context의 상태를 관리함  
-const ContextProvider: React.FC<React.PropsWithChildren> = (props) => {  
-  
-    // State, RefInput으로 폼 제출하면 여기에 추가 돠어야함  
-    const [item, setItem] = useState<Reactive[]>([]);  
-  
-    // 아이템 추가 핸들러  
-    const addItemHandler = (text: string) => {  
-        const newItem = new Reactive(text);  
-  
-        // 이전 상태를 기반으로 상태를 업데이터 하려면 함수 형식을 사용해야 함  
-        // concat으로 새로운 Item을 추가한 새 배열 반환  
-        setItem((pre) => {  
-            return pre.concat(newItem);  
-        });  
-    };  
-  
-    // 아이템 삭제 핸들러  
-    // 상태는 이전 상태를 기준으로 업데이트 하기 때문에 pre(전) 상태를 파라미터로 받는다  
-    const removeItemHandler = (itemId: string) => {  
-        setItem((pre) => {  
-            // 삭제하려는 itemId가 이전 상태 배열의 아이템 중 일치하는 item이 있다면 삭제  
-            return pre.filter(item => item.id !== itemId)  
-        });  
-    };  
-  
-    const contextValue: ContextObject = {  
-        items: item,  
-        addItem: addItemHandler,  
-        removeItem: removeItemHandler  
-    };  
-  
-    return <MainContext.Provider value={contextValue}>{props.children}</MainContext.Provider>  
-};  
-  
+const ContextProvider: React.FC<React.PropsWithChildren> = (props) => {
+
+   // State, RefInput으로 폼 제출하면 여기에 추가 돠어야함  
+   const [item, setItem] = useState<Reactive[]>([]);
+
+   // 아이템 추가 핸들러  
+   const addItemHandler = (text: string) => {
+      const newItem = new Reactive(text);
+
+      // 이전 상태를 기반으로 상태를 업데이터 하려면 함수 형식을 사용해야 함  
+      // concat으로 새로운 Item을 추가한 새 배열 반환  
+      setItem((pre) => {
+         return pre.concat(newItem);
+      });
+   };
+
+   // 아이템 삭제 핸들러  
+   // 상태는 이전 상태를 기준으로 업데이트 하기 때문에 pre(전) 상태를 파라미터로 받는다  
+   const removeItemHandler = (itemId: string) => {
+      setItem((pre) => {
+         // 삭제하려는 itemId가 이전 상태 배열의 아이템 중 일치하는 item이 있다면 삭제  
+         return pre.filter(item => item.id !== itemId)
+      });
+   };
+
+   const contextValue: ContextObject = {
+      items: item,
+      addItem: addItemHandler,
+      removeItem: removeItemHandler
+   };
+
+   return <MainContext.Provider value={contextValue}>{props.children}</MainContext.Provider>
+};
+
 export default ContextProvider;
 ```
 
@@ -500,27 +880,27 @@ export default ContextProvider;
 기존에 props을 받던것을 userContext를 이용해서 컨텍스트를 받아 props을 context로 대체합니다.
 
 ```tsx
-import React, {useContext} from "react";  
-  
-import ReactiveFCItem from "./ReactiveFCItem";  
-import {MainContext} from "../context/MainContext";  
-  
-const Item: React.FC = () => {  
-    const context = useContext(MainContext)  
-  
-    return (  
-        <ul>  
-            {context.items.map((item) =>  
-                <ReactiveFCItem  
-                    key={item.id}  
-                    text={item.text}  
-                    onRemoveItem={context.removeItem.bind(null, item.id)}  
-                />  
-            )}  
-        </ul>  
-    )  
-}  
-  
+import React, {useContext} from "react";
+
+import ReactiveFCItem from "./ReactiveFCItem";
+import {MainContext} from "../context/MainContext";
+
+const Item: React.FC = () => {
+   const context = useContext(MainContext)
+
+   return (
+           <ul>
+              {context.items.map((item) =>
+                      <ReactiveFCItem
+                              key={item.id}
+                              text={item.text}
+                              onRemoveItem={context.removeItem.bind(null, item.id)}
+                      />
+              )}
+           </ul>
+   )
+}
+
 export default Item;
 ```
 
@@ -531,90 +911,38 @@ export default Item;
 기존에 props을 받던것을 userContext를 이용해서 컨텍스트를 받아 props을 context로 대체합니다.
 
 ```tsx
-import React, {useRef, useContext} from "react";  
-import {MainContext} from "../context/MainContext";  
-  
-const Input: React.FC = () => {  
-    const context = useContext(MainContext);  
-  
-    // Input Ref  
-    const inputRef = useRef<HTMLInputElement>(null);  
-  
-    // Form 입력 시, Browser Default 방지  
-    const submitHandler = (event: React.FormEvent) => {  
-        event.preventDefault();  
-  
-        const enteredText = inputRef.current?.value;  
-  
-        // Input 검증  
-        if (enteredText.trim().length === 0) {  
-            // Throw an Error  
-            return;  
-        }  
-  
-        context.addItem(enteredText);  
-    };  
-  
-    return <form onSubmit={submitHandler}>  
-        <label htmlFor="text">Text Here</label>  
-        <input type="text" id="text" ref={inputRef} />  
-        <button>Add Item</button>  
-    </form>  
-}  
-  
+import React, {useRef, useContext} from "react";
+import {MainContext} from "../context/MainContext";
+
+const Input: React.FC = () => {
+   const context = useContext(MainContext);
+
+   // Input Ref  
+   const inputRef = useRef<HTMLInputElement>(null);
+
+   // Form 입력 시, Browser Default 방지  
+   const submitHandler = (event: React.FormEvent) => {
+      event.preventDefault();
+
+      const enteredText = inputRef.current?.value;
+
+      // Input 검증  
+      if (enteredText.trim().length === 0) {
+         // Throw an Error  
+         return;
+      }
+
+      context.addItem(enteredText);
+   };
+
+   return <form onSubmit={submitHandler}>
+      <label htmlFor="text">Text Here</label>
+      <input type="text" id="text" ref={inputRef} />
+      <button>Add Item</button>
+   </form>
+}
+
 export default Input;
-```
-
----
-
-## useEffect
-
-`useEffect`는 마운트/언마운트/업데이트 시 할 작업을 설정할 수 있는 LifeCycle Hook입니다.
-
-`useEffect`는 2개의 파라미터를 받습니다.
-
-- 1번 파라미터 : 함수(effect)
-- 2번 파라미터 : 배열(deps)
-
-<br>
-
-1번째 파라미터는 단순히 실행시킬 함수를 등록하면 됩니다.
-
-2번쨰 파라미터인 배열이 **빈 배열이라면 컴포넌트가 마운트 될 시 에만 적용**이 됩니다.
-
-```tsx
-useEffect(() => {
-	// 1. 실행할 함수,
-	// 2. 빈 배열
-});
-```
-
-<br>
-
-그리고 **배열에 특정 배열을 넣을 경우**, 해당 배열이 업데이트 될 때만 1번째 파라미터인 함수가 실행됩니다.
-
-```tsx
-useEffect(() => {
-	// 1. 실행할 함수,
-	// 2. 특정 배열
-});
-```
-
-<br>
-**※ cleanup 함수**  
-
-- useEffect 안에서 return 할 때 실행 된다.(useEffcet의 뒷정리를 한다.)
-- 만약 컴포넌트가 마운트 될 때 이벤트 리스너를 통해 이벤트를 추가하였다면 컴포넌트가 언마운트 될 때 이벤트를 삭제 해주어야 한다.
-
-그렇지 않으면 컴포넌트가 리렌더링 될 때마다 새로운 이벤트 리스너가 핸들러에 바인딩 될 것이다. 이는 자주 리렌더링 될 경우 메모리 누수가 발생할 수 있다.
-
-```tsx
-useEffect(() => {
- // 함수 처리부
- return () => {
-	 // cleanup
- }
-});
 ```
 
 ---
@@ -665,13 +993,13 @@ npm i @types/react-redux
 RootState와 AppDispatch는 Hooks에서 사용될 Dispatch와 Selector에 사용할 타입입니다.
 
 ```tsx
-import { configureStore } from "@reduxjs/toolkit";  
-  
-export const store = configureStore({  
-    reducer: {},  
-});  
-  
-export type RootState = ReturnType<typeof store.getState>;  
+import { configureStore } from "@reduxjs/toolkit";
+
+export const store = configureStore({
+   reducer: {},
+});
+
+export type RootState = ReturnType<typeof store.getState>;
 export type AppDispatch = typeof store.dispatch;
 ```
 
