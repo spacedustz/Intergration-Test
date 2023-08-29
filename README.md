@@ -5,11 +5,49 @@ A repository for All Types of Implementation Tests
 
 모든 유형의 구현 테스트를 위한 저장소
 
+<br>
+
+**이 저장소에서 사용할 기술 스택**
+<details>
+<summary>펼치기</summary>
+
+**Languages**
+- Backend : Java
+- Frontend : TypeScript
+
+<br>
+
+**Backend**
+- Spring Batch
+- Spring Data JPA
+- Maria DB & Redis
+- QueryDSL
+- MQTT, RTSP, HLS, FFmpeg
+- EMQ X Broker (MQTT Broker)
+- Akka Actor (Scala)
+- Kakao Map API
+
+<br>
+
+**Frontend**
+- **Vue.js** : Vue 3 Composition API, BootStrap, Vite, Vue Router, Vuex
+- **React.js** : zustand(상태 관리), sytled-component(컴포넌트 스타일링), react-query
+- **Next.js** : 
+- **Libraries** : Axios, Chart.js, Vue-Chart-3, ESLint, hls.js, date-fns & @types/date-fns (추가 중)
+</details>
+
+
 ---
 
 ## 1. 실시간 반응형 통계 데이터 시각화 (진행 중 -> 중단 (reason: Vue에서 React로 변경)
 
 **📂Directory📂** -> Converter, Vue-TS
+
+<br>
+
+- Backend : Spring Boot 3.1.2
+- Frontend : Vue 3
+
 
 <br>
 
@@ -21,43 +59,6 @@ A repository for All Types of Implementation Tests
 - Frontend에서 Rest API로 데이터를 떙겨와 Time Graph에 데이터를 넘긴다.
 - 감시자(Watcher)가 Rest API에서 데이터를 가져오는 함수를 감시하며 새로운 데이터가 Fetch 될 시 차트의 데이터 업데이트
 - 데이터를 넘기면서 Reactive하게 실시간으로 차트의 x,y축이 변동되고 바로 적용되어야 함
-
-<br>
-
-<details>
-<summary>서버 구성 펼치기</summary>
-
-- Backend : Spring Boot 3.1.2
-- Frontend : Vue 3
-
-<br>
-
-**Languages**
-- Backend : Java
-- Frontend : TypeScript
-
-<br>
-
-**사용 기술 스택**
-
-_Backend_
-- Spring Batch
-- Spring Data JPA
-- Maria DB
-- QueryDSL
-- MQTT, RTSP, HLS, FFmpeg
-- Akka Actor (Scala)
-- Kakao Map API
-
-<br>
-
-_Frontend_
-- Vue 3 Composition API, BootStrap, Vite
-- Axios, Chart.js, Vue-Chart-3, ESLint, hls.js
-- Vuex
-- Vue Router
-- date-fns & @types/date-fns
-</details>
 
 <br>
 
