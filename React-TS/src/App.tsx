@@ -7,7 +7,7 @@ import React from "react";
 import CounterForm from "./components/counter/CounterForm";
 import Counter from "./components/counter/Counter";
 import CounterReducer from "./components/counter/CounterReducer";
-import ReducerContext from "./components/counter/ReducerContext";
+import ReducerContext from "./components/context/ReducerContext";
 
 const App: React.FC = () => {
 
