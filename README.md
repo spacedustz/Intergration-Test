@@ -88,7 +88,10 @@ _Frontend_
 - [3. Ref & State & Event](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/3-Ref-State-Event.md)
 - [4. Effect & Memo](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/4-Effect-Memo.md)
 - [5. Callback](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/5-Callback.md)
-- [6. Recuder](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/6-Reducer.md)
+- [6. Reducer](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/6-Reducer.md)
+- [7. Custom Hooks](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/7-Custom-Hook.md)
+- [8. Context API](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/8-Context.md)
+- Redux Toolkit(작성 중)
 
 <br>
 
