@@ -751,17 +751,158 @@ const YourComponent: React.FC = () => {
 export default YourComponent;
 ```
 
+<br>
+
+예시를 적용하면 이런 형태가 됩니다.
+
+```tsx
+import React, { useReducer } from 'react';  
+  
+interface State {  
+    count: number;  
+}  
+  
+type Action =  
+    | { type: 'increment' }  
+    | { type: 'decrement' }  
+    | { type: 'reset' };  
+  
+const initialState: State = { count: 0 };  
+  
+function reducer(state: State, action: Action): State {  
+    switch (action.type) {  
+        case 'increment':  
+            return { count: state.count + 1 };  
+        case 'decrement':  
+            return { count: state.count - 1 };  
+        case 'reset':  
+            return initialState;  
+        default:  
+            throw new Error('Unhandled action type');  
+    }  
+}  
+  
+function Counter() {  
+    const [state, dispatch] = useReducer(reducer, initialState);  
+  
+    return (  
+        <div>  
+            Count: {state.count}  
+            <button onClick={() => dispatch({ type: 'increment' })}>Increment</button>  
+            <button onClick={() => dispatch({ type: 'decrement' })}>Decrement</button>  
+            <button onClick={() => dispatch({ type: 'reset' })}>Reset</button>  
+        </div>  
+    );  
+}  
+  
+export default Counter;
+```
+
+---
+
+## Custom Hooks
+
+컴포넌트를 만들다보면, 반복되는 로직이 자주 발생합니다. 예를 들어서 input 을 관리하는 코드는 관리 할 때마다 꽤나 비슷한 코드가 반복되죠.
+
+이번에는 그러한 상황에 커스텀 Hooks 를 만들어서 반복되는 로직을 쉽게 재사용하는 방법을 알아보겠습니다.
+
+<br>
+
+프로젝트 src 디렉터리에 `hooks` 디렉터리를 만들고 useInput.ts 파일을 만듭니다.
+
+**Custom Hook을 만들때는 보통 이렇게 `use`라는 키워드로 시작하는 파일을 만들고 그 안에 함수를 작성합니다.**
+
+커스텀 Hooks 를 만드는 방법은 굉장히 간단합니다.
+
+그냥, 그 안에서 `useState`, `useEffect`, `useReducer`, `useCallback` 등 Hooks 를 사용하여 원하는 기능을 구현해주고, 컴포넌트에서 사용하고 싶은 값들을 반환해주면 됩니다.
+
+<br>
+
+**Window.tsx**
+
+예시로 간단한 Custom Hook인 `useWindowWidth`를 작성해보겠습니다. 이 Hook은 현재 창의 너비를 추적하고 반환하는 역할을 합니다.
+
+```tsx
+import { useState, useEffect } from 'react';
+
+function useWindowWidth(): number {
+  const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setWindowWidth(window.innerWidth);
+    };
+
+    window.addEventListener('resize', handleResize);
+
+    return () => {
+      window.removeEventListener('resize', handleResize);
+    };
+  }, []);
+
+  return windowWidth;
+}
+```
+
+<br>
+
+**App.tsx**
+
+```tsx
+import React from 'react';
+import useWindowWidth from './useWindowWidth';
+
+const MyComponent: React.FC = () => {
+  const windowWidth = useWindowWidth();
+
+  return <div>Window Width: {windowWidth}px</div>;
+}
+
+```
+
 ---
 
 ## Context API
 
 React에서 Context API란 상위 컴포넌트에서 하위 컴포넌트로 데이터를 전달하기 위한 메커니즘을 제공합니다.
 
+Context API 를 사용하면, 프로젝트 안에서 전역적으로 사용 할 수 있는 값을 관리 할 수 있습니다.
+
+<br>
+
+우선, Context API 를 사용해서 새로운 Context 를 만드는 방법을 알아보겠습니다.
+
+Context 를 만들 땐 다음과 같이 `React.createContext()` 라는 함수를 사용합니다.
+
+```tsx
+type ContextObject = {  
+    items: Reactive[];  
+    addItem: (text: string) => void;  
+    removeItem: (id: string) => void;  
+}  
+  
+const UserDispatch = React.createContext<ContextObject>(null);
+```
+
+`createContext` 의 파라미터에는 Context 의 기본값을 설정할 수 있습니다. 여기서 설정하는 값은 Context 를 쓸 때 값을 따로 지정하지 않을 경우 사용되는 기본 값 입니다.
+
+<br>
+
+Context 를 만들면, Context 안에 Provider 라는 컴포넌트가 들어있는데 이 컴포넌트를 통해 Context 의 값을 정할 수 있습니다.
+
+이 컴포넌트를 사용할 때는, `value` 라는 값을 설정해주면 됩니다.
+
+```tsx
+<UserDispatch.Provider value={dispatch}>...</UserDispatch.Provider>
+```
+
+이렇게 설정해주고 나면 Provider 에 의하여 감싸진 컴포넌트 중 어디서든지 우리가 Context 의 값을 다른 곳에서 바로 조회해서 사용 할 수 있습니다.
+
 <br>
 
 **App.tsx**
 
-위 내용에선 App.tsx에 많은 이벤트 핸들러와 변수, 함수 등이 있었지만 전부 MainContext.tsx로 옮깁니다.
+App.tsx에 많은 이벤트 핸들러와 변수, 함수 등이 있다고 가정하고 전부 MainContext.tsx로 옮깁니다.
 
 그리고 MainContext에 정의된 ContextProvider를 통해 메인 앱에 출력합니다.
 
@@ -774,7 +915,7 @@ import ReactiveFC from "./components/item/ReactiveFC";
 import RefInput from "./components/item/RefInput";  
 import ContextProvider from "./components/context/MainContext";  
   
-function App() {  
+const App: React.FC = () => {  
     return (  
         <ContextProvider>  
             <RefInput />  
@@ -819,57 +960,57 @@ App.tsx에 있던 핸들러와 아이템 삭제 함수 등을 전부 `ContextPro
 MainContext.Provider 하위에 있는 자식 컴포넌트에서 useContext(MainContext) 훅을 사용하여 items 배열과 addItem, removeItem 함수에 액세스할 수 있습니다.
 
 ```tsx
-import React, {useState} from 'react';
-import Reactive from "../../models/data";
-
-type ContextObject = {
-   items: Reactive[];
-   addItem: (text: string) => void;
-   removeItem: (id: string) => void;
-}
-
+import React, {useState} from 'react';  
+import Reactive from "../../models/data";  
+  
+type ContextObject = {  
+    items: Reactive[];  
+    addItem: (text: string) => void;  
+    removeItem: (id: string) => void;  
+}  
+  
 // Context Hook을 위해 export 필요  
-export const MainContext = React.createContext<ContextObject>({
-   items: [],
-   addItem: () => {},
-   removeItem: () => {}
-});
-
+export const MainContext = React.createContext<ContextObject>({  
+    items: [],  
+    addItem: () => {},  
+    removeItem: () => {}  
+});  
+  
 // Context의 요소를 구성하는 함수형 컴포넌트, Context의 상태를 관리함  
-const ContextProvider: React.FC<React.PropsWithChildren> = (props) => {
-
-   // State, RefInput으로 폼 제출하면 여기에 추가 돠어야함  
-   const [item, setItem] = useState<Reactive[]>([]);
-
-   // 아이템 추가 핸들러  
-   const addItemHandler = (text: string) => {
-      const newItem = new Reactive(text);
-
-      // 이전 상태를 기반으로 상태를 업데이터 하려면 함수 형식을 사용해야 함  
-      // concat으로 새로운 Item을 추가한 새 배열 반환  
-      setItem((pre) => {
-         return pre.concat(newItem);
-      });
-   };
-
-   // 아이템 삭제 핸들러  
-   // 상태는 이전 상태를 기준으로 업데이트 하기 때문에 pre(전) 상태를 파라미터로 받는다  
-   const removeItemHandler = (itemId: string) => {
-      setItem((pre) => {
-         // 삭제하려는 itemId가 이전 상태 배열의 아이템 중 일치하는 item이 있다면 삭제  
-         return pre.filter(item => item.id !== itemId)
-      });
-   };
-
-   const contextValue: ContextObject = {
-      items: item,
-      addItem: addItemHandler,
-      removeItem: removeItemHandler
-   };
-
-   return <MainContext.Provider value={contextValue}>{props.children}</MainContext.Provider>
-};
-
+const ContextProvider: React.FC<React.PropsWithChildren> = (props) => {  
+  
+    // State, RefInput으로 폼 제출하면 여기에 추가 돠어야함  
+    const [item, setItem] = useState<Reactive[]>([]);  
+  
+    // 아이템 추가 핸들러  
+    const addItemHandler = (text: string) => {  
+        const newItem = new Reactive(text);  
+  
+        // 이전 상태를 기반으로 상태를 업데이터 하려면 함수 형식을 사용해야 함  
+        // concat으로 새로운 Item을 추가한 새 배열 반환  
+        setItem((pre) => {  
+            return pre.concat(newItem);  
+        });  
+    };  
+  
+    // 아이템 삭제 핸들러  
+    // 상태는 이전 상태를 기준으로 업데이트 하기 때문에 pre(전) 상태를 파라미터로 받는다  
+    const removeItemHandler = (itemId: string) => {  
+        setItem((pre) => {  
+            // 삭제하려는 itemId가 이전 상태 배열의 아이템 중 일치하는 item이 있다면 삭제  
+            return pre.filter(item => item.id !== itemId)  
+        });  
+    };  
+  
+    const contextValue: ContextObject = {  
+        items: item,  
+        addItem: addItemHandler,  
+        removeItem: removeItemHandler  
+    };  
+  
+    return <MainContext.Provider value={contextValue}>{props.children}</MainContext.Provider>  
+};  
+  
 export default ContextProvider;
 ```
 
@@ -880,27 +1021,27 @@ export default ContextProvider;
 기존에 props을 받던것을 userContext를 이용해서 컨텍스트를 받아 props을 context로 대체합니다.
 
 ```tsx
-import React, {useContext} from "react";
-
-import ReactiveFCItem from "./ReactiveFCItem";
-import {MainContext} from "../context/MainContext";
-
-const Item: React.FC = () => {
-   const context = useContext(MainContext)
-
-   return (
-           <ul>
-              {context.items.map((item) =>
-                      <ReactiveFCItem
-                              key={item.id}
-                              text={item.text}
-                              onRemoveItem={context.removeItem.bind(null, item.id)}
-                      />
-              )}
-           </ul>
-   )
-}
-
+import React, {useContext} from "react";  
+  
+import ReactiveFCItem from "./ReactiveFCItem";  
+import {MainContext} from "../context/MainContext";  
+  
+const Item: React.FC = () => {  
+    const context = useContext(MainContext)  
+  
+    return (  
+        <ul>  
+            {context.items.map((item) =>  
+                <ReactiveFCItem  
+                    key={item.id}  
+                    text={item.text}  
+                    onRemoveItem={context.removeItem.bind(null, item.id)}  
+                />  
+            )}  
+        </ul>  
+    )  
+}  
+  
 export default Item;
 ```
 
@@ -911,37 +1052,37 @@ export default Item;
 기존에 props을 받던것을 userContext를 이용해서 컨텍스트를 받아 props을 context로 대체합니다.
 
 ```tsx
-import React, {useRef, useContext} from "react";
-import {MainContext} from "../context/MainContext";
-
-const Input: React.FC = () => {
-   const context = useContext(MainContext);
-
-   // Input Ref  
-   const inputRef = useRef<HTMLInputElement>(null);
-
-   // Form 입력 시, Browser Default 방지  
-   const submitHandler = (event: React.FormEvent) => {
-      event.preventDefault();
-
-      const enteredText = inputRef.current?.value;
-
-      // Input 검증  
-      if (enteredText.trim().length === 0) {
-         // Throw an Error  
-         return;
-      }
-
-      context.addItem(enteredText);
-   };
-
-   return <form onSubmit={submitHandler}>
-      <label htmlFor="text">Text Here</label>
-      <input type="text" id="text" ref={inputRef} />
-      <button>Add Item</button>
-   </form>
-}
-
+import React, {useRef, useContext} from "react";  
+import {MainContext} from "../context/MainContext";  
+  
+const Input: React.FC = () => {  
+    const context = useContext(MainContext);  
+  
+    // Input Ref  
+    const inputRef = useRef<HTMLInputElement>(null);  
+  
+    // Form 입력 시, Browser Default 방지  
+    const submitHandler = (event: React.FormEvent) => {  
+        event.preventDefault();  
+  
+        const enteredText = inputRef.current?.value;  
+  
+        // Input 검증  
+        if (enteredText.trim().length === 0) {  
+            // Throw an Error  
+            return;  
+        }  
+  
+        context.addItem(enteredText);  
+    };  
+  
+    return <form onSubmit={submitHandler}>  
+        <label htmlFor="text">Text Here</label>  
+        <input type="text" id="text" ref={inputRef} />  
+        <button>Add Item</button>  
+    </form>  
+}  
+  
 export default Input;
 ```
 
