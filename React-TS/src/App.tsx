@@ -3,13 +3,30 @@ import './App.css'
 import ReactiveFC from "./components/item/ReactiveFC";
 import RefInput from "./components/item/RefInput";
 import ContextProvider from "./components/context/MainContext";
+import React from "react";
+import CounterForm from "./components/counter/CounterForm";
+import Counter from "./components/counter/Counter";
+import CounterReducer from "./components/counter/CounterReducer";
 
-function App() {
+const App: React.FC = () => {
+
+    const onSubmit = (form: { name: string; description: string; }) => {
+        console.log(form);
+    }
+
     return (
         <ContextProvider>
+        <div>
             <RefInput />
             <ReactiveFC />
-        </ContextProvider>
+        </div>
+
+        <div>
+            <Counter />
+            <CounterForm onSubmit={onSubmit} />
+            <CounterReducer />
+        </div>
+</ContextProvider>
     );
 }
 
