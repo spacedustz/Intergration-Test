@@ -7,6 +7,7 @@ import React from "react";
 import CounterForm from "./components/counter/CounterForm";
 import Counter from "./components/counter/Counter";
 import CounterReducer from "./components/counter/CounterReducer";
+import ReducerContext from "./components/counter/ReducerContext";
 
 const App: React.FC = () => {
 
@@ -16,17 +17,22 @@ const App: React.FC = () => {
 
     return (
         <ContextProvider>
-        <div>
-            <RefInput />
-            <ReactiveFC />
-        </div>
+            <div>
+                <RefInput/>
+                <ReactiveFC/>
+            </div>
 
-        <div>
-            <Counter />
-            <CounterForm onSubmit={onSubmit} />
-            <CounterReducer />
-        </div>
-</ContextProvider>
+            <div>
+                <Counter/>
+                <CounterForm onSubmit={onSubmit}/>
+            </div>
+
+            <div>
+                <ReducerContext>
+                    <CounterReducer/>
+                </ReducerContext>
+            </div>
+        </ContextProvider>
     );
 }
 
