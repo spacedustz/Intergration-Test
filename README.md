@@ -81,17 +81,31 @@ _Frontend_
 ## 2. React & TypeScript 학습 (진행 중)
 **📂Directory📂** -> React-TS, TypeScript
 
-**React**
-- [React 핵심 총 정리 Summary (진행 중)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Summary.md)
-- [1. Project Setting](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/1-Setup.md)
-- [2. 함수형 컴포넌트 & Props](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/2-Props.md)
-- [3. Ref & State & Event](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/3-Ref-State-Event.md)
-- [4. Effect & Memo](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/4-Effect-Memo.md)
-- [5. Callback](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/5-Callback.md)
-- [6. Reducer](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/6-Reducer.md)
-- [7. Custom Hooks](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/7-Custom-Hook.md)
-- [8. Context API](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/8-Context.md)
-- Redux Toolkit(작성 중)
+**React Basic**
+- [React 핵심 총 정리 Summary (진행 중)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Basic/Summary.md)
+- [1. Project Setting](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Basic/1-Setup.md)
+- [2. 함수형 컴포넌트 & Props](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Basic/2-Props.md)
+- [3. Ref & State & Event](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Basic/3-Ref-State-Event.md)
+- [4. Effect & Memo](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Basic/4-Effect-Memo.md)
+- [5. Callback](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Basic/5-Callback.md)
+- [6. Reducer](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Basic/6-Reducer.md)
+- [7. Custom Hooks](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Basic/7-Custom-Hook.md)
+- [8. Context API](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Basic/8-Context.md)
+
+<br>
+
+**Component Styling**
+- Sass
+- Css Module
+- Styled-Component
+
+<br>
+
+**Redux**
+- Redux
+- Redux-Logger
+- Redux-Thunk
+- Redux-Saga
 
 <br>
 
