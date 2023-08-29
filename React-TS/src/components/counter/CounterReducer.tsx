@@ -1,46 +1,10 @@
-import React, {useReducer} from "react";
-
-// 필요한 타입 선언
-type Color = 'red' | 'orange' | 'yellow';
-
-// State를 위한 타입
-type State = {
-    count: number;
-    text: string;
-    color: Color;
-    isGood: boolean;
-};
-
-// Action을 위한 타입
-type Action =
-    | { type: 'SET_COUNT'; count: number }
-    | { type: 'SET_TEXT'; text: string }
-    | { type: 'SET_COLOR'; color: Color }
-    | { type: 'TOGGLE_GOOD' };
-
-// Reducer 함수
-function reducer(state: State, action: Action): State {
-    switch (action.type) {
-        case "SET_COUNT": return { ...state, count: action.count };
-        case "SET_TEXT": return { ...state, text: action.text };
-        case "SET_COLOR": return { ...state, color: action.color };
-        case "TOGGLE_GOOD": return { ...state, isGood: !state.isGood };
-        default: throw new Error('Unhandled Action');
-    }
-}
+import React from "react";
+import {useCounterDispatch, useCounterState} from "./ReducerContext";
 
 export default function CounterReducer() {
 
-    // 초기 State 값
-    const initState: State = {
-        count: 0,
-        text: 'hello',
-        color: 'red',
-        isGood: true
-    };
-
-    // Use Reducer 1. Reducer함수, 초기 상태값
-    const [state, dispatch] = useReducer(reducer, initState);
+    const state = useCounterState();
+    const dispatch = useCounterDispatch();
 
     // DisPatch를 이용한 상태 변경
     const setCount = () => dispatch({ type: 'SET_COUNT', count: 5 }); // count 를 넣지 않으면 에러발생
