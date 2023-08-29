@@ -17,25 +17,25 @@ reducer 에서 반환하는 상태는 곧 컴포넌트가 지닐 새로운 상�
 여기서 `action` 은 업데이트를 위한 정보를 가지고 있습니다. 주로 `type` 값을 지닌 객체 형태로 사용하지만, 꼭 따라야 할 규칙은 따로 없습니다.
 
 ```ts
-type Action =  
-    | { type: 'LOGIN_SUCCESS'; payload: { userId: string } }  
-    | { type: 'LOGIN_FAILURE'; payload: { error: string } };  
-  
-function reducer(state: State, action: Action): State {  
-    switch (action.type) {  
-        case 'LOGIN_SUCCESS':  
+type Action =
+    | { type: 'LOGIN_SUCCESS'; payload: { userId: string } }
+    | { type: 'LOGIN_FAILURE'; payload: { error: string } };
+
+function reducer(state: State, action: Action): State {
+    switch (action.type) {
+        case 'LOGIN_SUCCESS':
             // 로그인 성공 시 상태 변경 로직  
             // action.payload.userId를 사용하여 상태를 업데이트  
-            return nextState;  
-  
-        case 'LOGIN_FAILURE':  
+            return nextState;
+
+        case 'LOGIN_FAILURE':
             // 로그인 실패 시 상태 변경 로직  
             // action.payload.error를 사용하여 상태를 업데이트  
-            return nextState;  
-  
-        default:  
-            return state;  
-    }  
+            return nextState;
+
+        default:
+            return state;
+    }
 }
 ```
 
@@ -131,3 +131,49 @@ const YourComponent: React.FC = () => {
   
 export default YourComponent;
 ```
+
+<br>
+
+예시를 적용하면 이런 형태가 됩니다.
+
+```tsx
+import React, { useReducer } from 'react';  
+  
+interface State {  
+    count: number;  
+}  
+  
+type Action =  
+    | { type: 'increment' }  
+    | { type: 'decrement' }  
+    | { type: 'reset' };  
+  
+const initialState: State = { count: 0 };  
+  
+function reducer(state: State, action: Action): State {  
+    switch (action.type) {  
+        case 'increment':  
+            return { count: state.count + 1 };  
+        case 'decrement':  
+            return { count: state.count - 1 };  
+        case 'reset':  
+            return initialState;  
+        default:  
+            throw new Error('Unhandled action type');  
+    }  
+}  
+  
+function Counter() {  
+    const [state, dispatch] = useReducer(reducer, initialState);  
+  
+    return (  
+        <div>  
+            Count: {state.count}  
+            <button onClick={() => dispatch({ type: 'increment' })}>Increment</button>  
+            <button onClick={() => dispatch({ type: 'decrement' })}>Decrement</button>  
+            <button onClick={() => dispatch({ type: 'reset' })}>Reset</button>  
+        </div>  
+    );  
+}  
+  
+export default Counter;
