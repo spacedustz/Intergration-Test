@@ -41,7 +41,9 @@ A repository for All Types of Implementation Tests
 
 ---
 
-## 1. 실시간 반응형 통계 데이터 시각화 (진행 중 -> 중단 (reason: Vue에서 React로 변경)
+## 1. 실시간 반응형 통계 데이터 시각화 (진행 중 -> 중단)
+**중단이유** : Vue에서 React.js & Next.js로 변경
+
 
 **📂Directory📂** -> Converter, Vue-TS
 
@@ -104,11 +106,8 @@ A repository for All Types of Implementation Tests
 
 <br>
 
-**Redux**
-- Redux
-- Redux-Logger
-- Redux-Thunk
-- Redux-Saga
+**상태 관리**
+- Zustand
 
 <br>
 
