@@ -1,5 +1,5 @@
 import React from "react";
-import {useCounterDispatch, useCounterState} from "./ReducerContext";
+import {useCounterDispatch, useCounterState} from "../context/ReducerContext";
 
 export default function CounterReducer() {
 
