@@ -35,7 +35,7 @@ A repository for All Types of Implementation Tests
 - **Vue.js** : Vue 3 Composition API, BootStrap, Vite, Vue Router, Vuex
 - **React.js** : zustand(상태 관리), sytled-component(컴포넌트 스타일링), react-query
 - **Next.js** : 
-- **Libraries** : Axios, Chart.js, Vue-Chart-3, ESLint, hls.js, date-fns & @types/date-fns (추가 중)
+- **Libraries** : Axios, Chart.js, Vue-Chart-3, ESLint, hls.js, date-fns & @types/date-fns, styled-component, types@styled-component (추가 중)
 </details>
 
 
@@ -100,14 +100,12 @@ A repository for All Types of Implementation Tests
 <br>
 
 **Component Styling**
-- Sass
-- Css Module
-- Styled-Component
+- [Styled-Component 사용법](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Component-Styling/Summary.md)
 
 <br>
 
 **상태 관리**
-- Zustand
+- [Zustand 사용법](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Zustand/Summary.md)
 
 <br>
 
