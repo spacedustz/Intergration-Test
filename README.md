@@ -22,10 +22,10 @@ A repository for All Types of Implementation Tests
 **Backend**
 - Spring Batch
 - Spring Data JPA
-- Maria DB & Redis
+- Maria DB
+- Rabbit MQ (MQTT Broket) Pub/Sub
 - QueryDSL
 - MQTT, RTSP, HLS, FFmpeg
-- EMQ X Broker (MQTT Broker)
 - Akka Actor (Scala)
 - Kakao Map API
 
@@ -35,7 +35,17 @@ A repository for All Types of Implementation Tests
 - **Vue.js** : Vue 3 Composition API, BootStrap, Vite, Vue Router, Vuex
 - **React.js** : zustand(상태 관리), sytled-component(컴포넌트 스타일링), react-query
 - **Next.js** : 
-- **Libraries** : Axios, Chart.js, Vue-Chart-3, ESLint, hls.js, date-fns & @types/date-fns, styled-component, types@styled-component (추가 중)
+- **Libraries**
+  - Axios
+  - Chart.js, Vue-Chart-3
+  - ESLint
+  - hls.js
+  - date-fns & @types/date-fns
+  - styled-component, types@styled-component
+  - react-query
+  - zustand
+  - react-router-dom
+  - (추가 중)
 </details>
 
 
@@ -108,6 +118,10 @@ A repository for All Types of Implementation Tests
 - [Zustand 사용법](https://github.com/spacedustz/Intergration-Test/blob/main/Description/React/Zustand/Summary.md)
 
 <br>
+
+**Web Socket**
+- [WebSocket을 이용한 MQTT Data 받기 (RabbitMQ)](https://gitub.com/spacedustz/Intergration-Test/blob/main/Description/Socket/WebSocket.md)
+
 
 **TypeScript**
 - [TypeScript 환경 세팅](https://github.com/spacedustz/Intergration-Test/blob/main/Description/TypeScript/Setup.md)
