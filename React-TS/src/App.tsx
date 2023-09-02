@@ -10,6 +10,7 @@ import CounterReducer from "./components/counter/CounterReducer";
 import ReducerContext from "./components/context/ReducerContext";
 import styled, {css} from "styled-components";
 import Button from "./components/style/GlobalStyledBotton";
+import RabbitMqWebSocketHandler from "./components/mqtt/RabbitMqWebSocketHandler";
 
 interface CircleProps {
     color?: string;
@@ -83,6 +84,12 @@ const App: React.FC = () => {
             <div>
                 <AppBlock>
 
+                </AppBlock>
+            </div>
+
+            <div>
+                <AppBlock>
+                    <RabbitMqWebSocketHandler />
                 </AppBlock>
             </div>
         </ContextProvider>
