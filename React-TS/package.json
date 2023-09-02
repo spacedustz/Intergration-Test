@@ -10,14 +10,17 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@stomp/stompjs": "^7.0.0",
     "@types/lodash": "^4.14.197",
     "@types/styled-components": "^5.1.26",
     "axios": "^1.5.0",
     "chart.js": "^4.4.0",
     "lodash": "^4.17.21",
+    "mqtt": "^5.0.4",
     "react": "^18.2.0",
     "react-chartjs-2": "^5.2.0",
     "react-dom": "^18.2.0",
+    "react-query": "^3.39.3",
     "styled-components": "^6.0.7",
     "zustand": "^4.4.1"
   },
