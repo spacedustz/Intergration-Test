@@ -255,7 +255,7 @@ export default RabbitMqWebSocketHandler;
 
 <br>
 
-프론트엔드 서버를 켜보면 콘솔 로그에 WebSocket Connected가 뜨고 포트를 확인해보면 양방향으로 소켓 연결이 되었습니다.
+RabbitMQ의 소켓 포트인 15674 포트를 확인해보면 양방향으로 Established 된것을 확인 할 수 있습니다.
 
 ![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/socket.png)
 
