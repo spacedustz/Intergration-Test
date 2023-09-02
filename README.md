@@ -120,7 +120,7 @@ A repository for All Types of Implementation Tests
 <br>
 
 **Web Socket**
-- [WebSocket을 이용한 MQTT Data 받기 (RabbitMQ)](https://gitub.com/spacedustz/Intergration-Test/blob/main/Description/Socket/WebSocket.md)
+- [WebSocket을 이용한 MQTT Data 받기 (RabbitMQ)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Socket/WebSocket.md)
 
 <br>
 
