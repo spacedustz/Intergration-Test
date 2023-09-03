@@ -1,4 +1,4 @@
-## RabbitMQ를 이용한 MQTT 데이터의 실시간 통신
+## RabbitMQ를 이용한 MQTT 데이터 실시간 통신
 
 1. 특정 소프트웨어에서 MQTT로 데이터가 계속 나옴
 2. Message Broker인 RabbitMQ를 이용해 MQTT 데이터를 Queue에 쌓는다.
@@ -145,6 +145,17 @@ http://localhost:15672
 
 **RabbitMQ 웹 관리 콘솔 Exchange, Queue 생성**
 
+Publish/Subscribe 패턴을 구현하기 위해 Exchange의 타입을 Topic으로 설정합니다.
+
+Topic Exchange는 Binding Key 패턴이 일치하는 Queue에만 선택적으로 데이터를 전송합니다.
+
+Topic Exchange는 `*`와 `#`을 이용해 와일드 카드를 표현할 수 있습니다.
+
+- `*` : 단어 하나 일치
+- `#` : 0 또는 1개 이상의 단어 일치
+
+<br>
+
 **Exchanges 생성**
 - Name: Exchange 이름
 - Type : 보통 "Topic"을 선택 (MQTT Topic Routing에 가장 적함함)
@@ -182,6 +193,8 @@ http://localhost:15672
 ## MQTT Client 설정
 
 MQTT Client는 React + TypeScript 환경에서 진행합니다.
+
+RabbitMQ와의 Socket 통신을 위해 @stomp/stompjs 패키지를 설치해줍니다.
 <br>
 
 **RabitMqWebSocketHandler.tsx**
@@ -195,61 +208,61 @@ MQTT Client는 React + TypeScript 환경에서 진행합니다.
 Exchange & Queue에 맞는 Routing Key와 Topic을 설정하고 출력하는 컴포넌트를 작성했습니다.
 
 ```tsx
-import React, { useEffect, useState } from 'react';
-import { Client } from '@stomp/stompjs';
-
-const RabbitMqWebSocketHandler: React.FC = () => {
-    const [messages, setMessages] = useState<string[]>([]);
-    const stompBrokerUrl = 'ws://localhost:15674/ws';
+import React, { useEffect, useState } from 'react';  
+import { Client } from '@stomp/stompjs';  
+  
+const RabbitMqWebSocketHandler: React.FC = () => {  
+    const [messages, setMessages] = useState<string[]>([]);  
+    const stompBrokerUrl = 'ws://localhost:15674/ws';  
     const stompTopic = 'TestQueue'; // RabbitMQ의 Queue 이름에 맞게 설정  
-
-    useEffect(() => {
+  
+    useEffect(() => {  
         // STOMP 클라이언트 설정  
-        const stompClient = new Client({
-            brokerURL: stompBrokerUrl,
-            connectHeaders: {
-                login: 'guest',
+        const stompClient = new Client({  
+            brokerURL: stompBrokerUrl,  
+            connectHeaders: {  
+                login: 'guest',  
                 passcode: 'guest', // RabbitMQ의 인증 정보에 맞게 설정  
-            },
-            debug: (str: string) => {
-                console.log(str);
-            },
-        });
-
-        stompClient.onConnect = () => {
-            console.log('STOMP connected');
-            stompClient.subscribe(stompTopic, (frame) => {
-                const newMessage = `STOMP - Message: ${frame.body}`;
-                setMessages((prevMessages) => [...prevMessages, newMessage]);
-            });
-        };
-
-        stompClient.onStompError = (frame) => {
-            console.error('STOMP error', frame.headers['message']);
-        };
-
-        stompClient.activate();
-
+            },  
+            debug: (str: string) => {  
+                console.log(str);  
+            },  
+        });  
+  
+        stompClient.onConnect = () => {  
+            console.log('STOMP connected');  
+            stompClient.subscribe(stompTopic, (frame) => {  
+                const newMessage = `STOMP - Message: ${frame.body}`;  
+                setMessages((prevMessages) => [...prevMessages, newMessage]);  
+            });  
+        };  
+  
+        stompClient.onStompError = (frame) => {  
+            console.error('STOMP error', frame.headers['message']);  
+        };  
+  
+        stompClient.activate();  
+  
         // 컴포넌트 언마운트 시 클라이언트 연결 해제  
-        return () => {
-            stompClient.deactivate();
-        };
-    }, []);
-
-    return (
-        <div>
-            <h2>RabbitMQ Listener</h2>
-            <ul>
-                {messages.map((message, index) => (
-                    <li key={index}>
-                        <p>{message}</p>
-                    </li>
-                ))}
-            </ul>
-        </div>
-    );
-};
-
+        return () => {  
+            stompClient.deactivate();  
+        };  
+    }, []);  
+  
+    return (  
+        <div>  
+            <h2>RabbitMQ Listener</h2>  
+            <ul>  
+                {messages.map((message, index) => (  
+                    <li key={index}>  
+                        <p>{message}</p>  
+                    </li>  
+                ))}  
+            </ul>  
+        </div>  
+    );  
+};  
+  
 export default RabbitMqWebSocketHandler;
 ```
 
@@ -269,4 +282,4 @@ RabbitMQ의 소켓 포트인 15674 포트를 확인해보면 양방향으로 Est
 
 간단하게 MQTT 데이터를 RabbitMQ를 통해 Queue로 받아서 프론트엔드에서 실시간 통신을 해보았습니다.
 
-다음 글에선 백엔드에서 RabbitMQ의 데이터를 받아 Rest API로 프론트+백엔드 둘다 이용하여 실시간 차트를 만들어보겠습니다.
+테스트는 완료했으니 다음 글에서는 데이터를 백엔드에서 받고, RabbitMQ <-> Backend와 실시간 통신을 해서 실시간으로 받은 데이터를 프론트엔드에서 RestAPI로 가져와서 실시간으로 그래프가 변하는 Scatter 차트를 만들어 보겠습니다.
