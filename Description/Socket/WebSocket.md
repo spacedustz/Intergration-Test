@@ -1,8 +1,8 @@
 ## RabbitMQ를 이용한 MQTT 데이터 실시간 통신
 
-1. 특정 소프트웨어에서 MQTT로 데이터가 계속 나옴
-2. Message Broker인 RabbitMQ를 이용해 MQTT 데이터를 Queue에 쌓는다.
-3. Queue에 쌓인 데이터를 Pub/Sub 구조로 프론트엔드(MQTT Client)와 실시간 통신을 하고싶음(Web Socket)
+1. **MQTT Producer** : 특정 소프트웨어에서 딥러닝 엔진을 거쳐 MQTT로 데이터가 계속 나옴
+2. **MQTT Broker(RabbitMQ**) : Message Broker인 RabbitMQ를 이용해 MQTT 데이터를 Queue에 쌓는다.
+3. **MQTT Client(FrontEnd Server)** : Queue에 쌓인 데이터를 Pub/Sub 구조로 프론트엔드(MQTT Client)와 실시간 통신을 하고싶음(Web Socket)
 
 <br>
 
