@@ -4,7 +4,7 @@ import { Client } from '@stomp/stompjs';
 const RabbitMqWebSocketHandler: React.FC = () => {
     const [messages, setMessages] = useState<string[]>([]);
     const stompBrokerUrl = 'ws://localhost:15674/ws';
-    const stompTopic = 'TestQueue'; // RabbitMQ의 Queue 이름에 맞게 설정
+    const stompTopic = 'q.frame'; // RabbitMQ의 Queue 이름에 맞게 설정
 
     useEffect(() => {
         // STOMP 클라이언트 설정

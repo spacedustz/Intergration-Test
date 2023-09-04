@@ -63,7 +63,7 @@ rabbitmq-service.bat start
 
 ---
 
-## RabbitMQ 서버 실행 & 설정
+## RabbitMQ 서버 초기 설정
 
 테스트를 위해 윈도우 Local 환경에서 진행합니다.
 
@@ -74,7 +74,7 @@ rabbitmq-service.bat start
 - eqmd: 4369
 - Erlang Distributuin: 25672
 - AMQP TLS : 5671, 5672
-- Management Plugin : 15672
+- 관리자 웹 콘솔 : 15672
 - MQTT : 1883, 8883
 - RabbitMQ Socket Port : 15674
 
@@ -83,13 +83,6 @@ rabbitmq-service.bat start
 **로그 파일 위치**
 
 - C:\Users\계정명\AppData|Roaming\RabbitMQ\log
-
-<br>
-
-**RabbitMQ 플러그인 설치**
-
-- 관리자 페이지 : rabbitmq_management
-- MQTT : rabbitmq_mqtt
 
 <br>
 
@@ -123,27 +116,28 @@ rabbitmq-plugins enable rabbitmq_web_stomp
 
 <br>
 
-**RabbitMQ 관리자 페이지, MQTT 포트 떠있는지 확인**
+**RabbitMQ 관리자 페이지, MQTT, Rabbit Socket 포트 떠있는지 (Listening) 확인**
 
-```
-netstat -ano | findstr :15672
-netstat -ano | findstr :1883
+```bash
+netstat -ano | findstr :15672 # 관리자 콘솔 포트
+netstat -ano | findstr :1883 # MQTT 포트
+netstat -ano | findstr :15674 # Rabbit Socket 포트
 ```
 
 <br>
 
 **RabbitMQ 관리자 페이지 접속 (인터넷 주소창에 입력)**
 
-- 첫 로그인 ID : guest
-- 비밀번호 : guest
+- Default 로그인 ID : guest
+- Default 비밀번호 : guest
 
 ```
 http://localhost:15672
 ```
 
-<br>
+---
 
-**RabbitMQ 웹 관리 콘솔 Exchange, Queue 생성**
+## RabbitMQ Exchange & Queue & Binding 설정
 
 Publish/Subscribe 패턴을 구현하기 위해 Exchange의 타입을 Topic으로 설정합니다.
 
@@ -159,13 +153,17 @@ Topic Exchange는 `*`와 `#`을 이용해 와일드 카드를 표현할 수 있�
 **Exchanges 생성**
 - Name: Exchange 이름
 - Type : 보통 "Topic"을 선택 (MQTT Topic Routing에 가장 적함함)
-- Durable & Auto Delete : 일반적으로 체크하지 않음 (메시지 보존 및 삭제 정책에 따라 선택)
+- Durable 설정 (Transient로 설정 시 RabbitMQ 재시작 하면 Exchange가 사라집니다.)
 - Add Exchange
+
+<br>
 
 **Queue** 생성
 - Name: Queue 이름
 - Durable, Exclusive & Auto Delete : 일반적으로 체크하지 않음 (메시지 보존 및 삭제 정책에 따라 선택)
 - Add Queue
+
+<br>
 
 **Exchange <-> Queue 바인딩**
 - Queue 탭으로 이동 후 만든 큐의 이름 클릭
@@ -173,6 +171,44 @@ Topic Exchange는 `*`와 `#`을 이용해 와일드 카드를 표현할 수 있�
 - From Exchange 필드에 앞서 만든 Exchange의 이름 입력
 - Routing Key 필드에 MQTT Topic Pattern 입력 (ex: test/topic)
 - Bind 클릭
+
+<br>
+
+
+★**(중요)**★
+
+RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본으로 만들어져 있는 `amp.topic` Exchange로 갑니다.
+
+그래서 Default Exchange로 들어오는 데이터를 위에서 직접 만든 Exchange로 데이터가 넘어가게 설정(바인딩)해줘야 합니다.
+
+- amp.topic Exchange로 들어가서 만든 **Exchange(Queue가 아님)**와 바인딩을 해줍니다.
+- amp.topic Exchange의 Binding 섹션에서 **To Exchange**를 선택하고 Routing Key로 `#`을 입력해서 기본 Exchange -> 만든 Exchange로 데이터가 넘어가게 해줍니다.
+
+<br>
+
+> **😯 만약 Queue에 보존된 메시지를 RabbitMQ 서버를 재시작 했을때에도 보존하고 싶을 경우 아래와 같이 Exchange <-> Queue 바인딩**
+
+**1번 방법**
+
+- 사용중인 Queue에 들어가서 Add Binding 섹션을 찾습니다.
+- 바인딩은 동일하게 하되 Arguments에 Message의 TTL은 -1로 설정해주면 메시지가 계속 보존됩니다. **(참고로 TTL의 단위는 milli second)**
+- 만약 큐에 저장되는 메시지 수나 크기에 대한 제한도 없애려면 `x-max-length-bytes` 옵션도 `-1`로 설정하고 바인딩 하면 됩니다.
+
+![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/rabbit-ttl.png)
+
+<br>
+
+**2번 방법**
+
+- 사용중인 Queue에 들어가줍니다.
+- Message TTL을 `-1`이 아니라 TTL값을 임의로 지정해서 메시지를 주기적으로 삭제해야 하는 경우
+- Exchange와 Binding시 Argument의 `x-message-ttl` 값을 설정하고 싶은 값으로 설정
+- Subscriber(프론트엔드 서버 = MQTT Client)는 잠시 구독을 중지한 상태에서 Queue에 MQTT 데이터를 넣어봅니다.
+- 사용중인 Queue로 진입 - 하단의 `Publish Message` 섹션 찾기
+- Delivery Mode를 `2-Persistent`로 설정하고 Publish Message를 누르고 RabbitMQ 서버를 재시작 해보기
+- RabbitMQ 서버를 재시작해도 Queue에 데이터가 남아있습니다.
+
+![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/rabbit-alive.png)
 
 <br>
 
