@@ -189,13 +189,13 @@ RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본�
 
 > **😯 만약 Queue에 보존된 메시지를 RabbitMQ 서버를 재 시작 했을 때에도 보존하고 싶을 경우 아래와 같이 Exchange <-> Queue 바인딩**
 
-**1번 방법**
+**~~1번 방법~~ (안먹힘)**
 
 - 사용중인 Queue에 들어가서 Add Binding 섹션을 찾습니다.
 - 바인딩은 동일하게 하되 Arguments에 Message의 TTL은 -1로 설정해주면 메시지가 계속 보존됩니다. **(참고로 TTL의 단위는 milli second)**
 - 만약 큐에 저장되는 메시지 수나 크기에 대한 제한도 없애려면 `x-max-length-bytes` 옵션도 `-1`로 설정하고 바인딩 하면 됩니다.
 
-![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/rabbit-ttl.png)
+<img src="https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/rabbit-ttl.png" width="110%">
 
 <br>
 
@@ -208,10 +208,27 @@ RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본�
 - 사용중인 Queue로 진입 - 하단의 `Publish Message` 섹션 찾기
 - Delivery Mode를 `2-Persistent`로 설정하고 Publish Message를 누르고 RabbitMQ 서버를 재시작 해보기
 - RabbitMQ 서버를 재시작해도 Queue에 데이터가 남아있습니다.
+- or
+- Producer에서 MQTT 데이터를 보낼때 Header에 `persistent : true` 옵션을 주면 가능합니다.
 
 ![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/rabbit-alive.png)
 
 <br>
+
+**3번 방법 : Publisher Confirm**
+
+`Publisher Confirm` 방식은 메시지가 RabbitMQ에  성공적으로 다돌했음을 보장하는 매커니즘입니다.
+
+이 기능은 메시지를 발행하는 Producer 측에서 사용되며 프로듀서가 RabbitMQ에 메시지를 보낸 후,
+
+RabbitMQ가 메시지를 받았음을 알리는 확인(Acknowledgment)를 프로듀서에게 보내는 방식입니다.
+
+<br>
+
+- 1번 방법: 메시지를 Publish 할 때 Header에 `persistent : true` 옵션을 걸면 Message의 Delivery Mode가 2가 되며 메시지는 영속성을 가집니다.
+- 2번 방법 : Python Pika 라이브러리의 `pika.BlockingConnection(pika.ConnectionParameters('localhost)).confirm_delivery()`` 함수를 사용하는 방식이 있습니다.
+
+<br><br>
 
 위의 설정을 마무리 하면 RabbitMQ는 설정한 Topic으로 발행된 MQTT 메시지를 수신할 준비가 됩니다.
 
