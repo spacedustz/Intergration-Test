@@ -206,7 +206,7 @@ RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본�
 
 ---
 
-## 😯 만약 Queue에 보존된 메시지를 RabbitMQ 서버를 재 시작 했을 때에도 보존하고 싶을 경우
+## 😯 Queue에 쌓인 메시지를 RabbitMQ를 재기동 했을 때에도 보존하고 싶을 경우
 
 **~~1번 방법~~ (안먹힘)**
 
