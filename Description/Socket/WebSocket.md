@@ -1,17 +1,32 @@
 ## RabbitMQ를 이용한 MQTT 데이터 실시간 통신
 
 1. **MQTT Producer** : 특정 소프트웨어에서 딥러닝 엔진을 거쳐 MQTT로 데이터가 계속 나옴
-2. **MQTT Broker(RabbitMQ**) : Message Broker인 RabbitMQ를 이용해 MQTT 데이터를 Queue에 쌓는다.
+2. **MQTT Broker(RabbitMQ**) : Message Broker인 RabbitMQ를 이용해 MQTT 데이터를 Rabbit MQ의 Exchange를 거쳐 Routing Key에 맞는Queue에 쌓는다.
 3. **MQTT Client(FrontEnd Server)** : Queue에 쌓인 데이터를 Pub/Sub 구조로 프론트엔드(MQTT Client)와 실시간 통신을 하고싶음(Web Socket)
 
 <br>
 
-이번엔 도커 컨테이너를 사용 안하고 로컬에 RabbitMQ등을 설치해서 진행합니다.
+**환경 요구 사항**
+
+- 도커 컨테이너 사용 X,
+- 로컬(Windows)에 RabbitMQ 등 설치
+- RabbitMQ GUI Management Console 기반으로 진행
+
+<br>
+
+**🫡 내용 수정 & 추가**
+
+- Topic Message의 Persistent를 설정하는 방법을 Quorum Queue를 사용하는 것으로 변경
+- RabbitMQ 3.11 부터 Quorum Queue 사용 시 Message의 Persistent 옵션이 기본으로 Delivery Mode 2가 되고 메모리 저장이 아닌 디스크 저장 방식
+- Client(React)에서 Stomp의 헤더에 autoConfirm의 값을 true로 넘겨야 소켓 연결이 안끊김
+- Client (React) 코드에 Quorum Queue의 Auto Confirm 헤더 추가함
 
 ---
 ## 1. Erlang OTP 설치
 
 RabbitMQ를 설치하기 전 Erlang을 설치해야 하는데, 설치는 **관리자 권한**으로 설치해야 합니다.
+
+Erlang을 설치하는 이유는 RabbitMQ가 Erlang으로 만들어져 있기 때문입니다.
 
 관리자 권한이 아니라면 윈도우 서비스에서 RabbitMQ를 검색할 수 없게 됩니다.
 
@@ -28,6 +43,8 @@ RabbitMQ를 설치하기 전 Erlang을 설치해야 하는데, 설치는 **관�
 ## 2. RabbitMQ 설치
 
 Erlang을 **관리자 권한**으로 설치 했으면 이제 RabbitMQ를 설치합니다.
+
+RabbitMQ도 **관리자 권한**으로 설치합니다.
 
 [RabbitMQ 설치](https://www.rabbitmq.com/install-windows.html)
 
@@ -58,7 +75,6 @@ Erlang을 **관리자 권한**으로 설치 했으면 이제 RabbitMQ를 설치�
 ```shell
 rabbitmq-service.bat install
 sc config RabbitMQ start=auto
-rabbitmq-service.bat start
 ```
 
 ---
@@ -100,12 +116,12 @@ rabbitmq-server
 
 <br>
 
-**RabbitMQ 관리자 페이지를 GUI로 보기 위한 플러그인, MQTT 플러그인 설치**
+**RabbitMQ 관리자 페이지를 GUI로 보기 위한 플러그인, MQTT 플러그인, Web Socket 설치**
 
 - rabbitmq_management : 웹 관리 콘솔 플러그인
 - rabbitmq_mqtt : MQTT 플러그인
 - rabbitmq_web_mqtt : 웹 소켓 연결을 지원하는 MQTT 플러그인
-- rabbitmq_web_stmop : 웹 소켓 플러그인
+- rabbitmq_web_stomp : 웹 소켓 플러그인
 
 ```shell
 rabbitmq-plugins enable rabbitmq_management
@@ -160,7 +176,7 @@ Topic Exchange는 `*`와 `#`을 이용해 와일드 카드를 표현할 수 있�
 
 **Queue** 생성
 - Name: Queue 이름
-- Durable, Exclusive & Auto Delete : 일반적으로 체크하지 않음 (메시지 보존 및 삭제 정책에 따라 선택)
+- Durable 설정 (Transient로 설정 시 RabbitMQ 재시작 하면 Queue가 사라집니다.)
 - Add Queue
 
 <br>
@@ -176,12 +192,12 @@ Topic Exchange는 `*`와 `#`을 이용해 와일드 카드를 표현할 수 있�
 
 > **😯 Default Exchange로 들어오는 데이터를 직접 만든 Exchange로 데이터 라우팅하기**
 
-RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본으로 만들어져 있는 `amp.topic` Exchange로 갑니다.
+RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본으로 만들어져 있는 `amq.topic` Exchange로 갑니다.
 
 그래서 Default Exchange로 들어오는 데이터를 위에서 직접 만든 Exchange로 데이터가 넘어가게 설정(바인딩)해줘야 합니다.
 
-- amp.topic Exchange로 들어가서 만든 **Exchange(Queue가 아님)**와 바인딩을 해줍니다.
-- amp.topic Exchange의 Binding 섹션에서 **To Exchange**를 선택하고 Routing Key로 `#`을 입력해서 기본 Exchange -> 만든 Exchange로 데이터가 넘어가게 해줍니다.
+- amq.topic Exchange로 들어가서 만든 **Exchange(Queue가 아님)**와 바인딩을 해줍니다.
+- amq.topic Exchange의 Binding 섹션에서 **To Exchange**를 선택하고 Routing Key로 `#`을 입력해서 기본 Exchange -> 만든 Exchange로 데이터가 넘어가게 해줍니다.
 
 [RabbitMQ Topolozy 구성 좋은 글 발견함](https://medium.com/@supermegapotter/rabbitmq-topology-guide-8427ebbe927f)
 
@@ -199,17 +215,12 @@ RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본�
 
 <br>
 
-**2번 방법**
+**2번 방법 (이 방법 사용했음)**
 
-- 사용중인 Queue에 들어가줍니다.
-- Message TTL을 `-1`이 아니라 TTL값을 임의로 지정해서 메시지를 주기적으로 삭제해야 하는 경우
-- Exchange와 Binding시 Argument의 `x-message-ttl` 값을 설정하고 싶은 값으로 설정
-- Subscriber(프론트엔드 서버 = MQTT Client)는 잠시 구독을 중지한 상태에서 Queue에 MQTT 데이터를 넣어봅니다.
-- 사용중인 Queue로 진입 - 하단의 `Publish Message` 섹션 찾기
-- Delivery Mode를 `2-Persistent`로 설정하고 Publish Message를 누르고 RabbitMQ 서버를 재시작 해보기
-- RabbitMQ 서버를 재시작해도 Queue에 데이터가 남아있습니다.
-- or
-- Producer에서 MQTT 데이터를 보낼때 Header에 `persistent : true` 옵션을 주면 가능합니다.
+- Queue를 만들때 Quorum Queue로 생성합니다.
+- RabbitMQ 3.11 버전부터 쿼럼 큐의 메세지 저장방식의 Default는 디스크 저장입니다.
+- C:\Users계정명\AppData\Roaming\RabbitMQ\db\클러스터이름\quorum 에 데이터가 쌓입니다.
+- 단 Quorum Queue는 Confirm 방식이기 떄문에 Client(React)에서 autoConfirm 옵션을 True로 설정해야 합니다.
 
 ![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/rabbit-alive.png)
 
@@ -249,9 +260,10 @@ RabbitMQ가 메시지를 받았음을 알리는 확인(Acknowledgment)를 프로
 MQTT Client는 React + TypeScript 환경에서 진행합니다.
 
 RabbitMQ와의 Socket 통신을 위해 @stomp/stompjs 패키지를 설치해줍니다.
+
 <br>
 
-**RabitMqWebSocketHandler.tsx**
+**RabbitMqWebSocketHandler.tsx**
 
 이제 프론트엔드 서버인 React에 MQTT Client 코드를 작성합니다.
 
@@ -263,12 +275,12 @@ Exchange & Queue에 맞는 Routing Key와 Topic을 설정하고 출력하는 컴
 
 ```tsx
 import React, { useEffect, useState } from 'react';  
-import { Client } from '@stomp/stompjs';  
+import {Client, StompHeaders} from '@stomp/stompjs';  
   
 const RabbitMqWebSocketHandler: React.FC = () => {  
     const [messages, setMessages] = useState<string[]>([]);  
     const stompBrokerUrl = 'ws://localhost:15674/ws';  
-    const stompTopic = 'TestQueue'; // RabbitMQ의 Queue 이름에 맞게 설정  
+    const stompTopic = 'q.frame'; // RabbitMQ의 Queue 이름에 맞게 설정  
   
     useEffect(() => {  
         // STOMP 클라이언트 설정  
@@ -283,12 +295,19 @@ const RabbitMqWebSocketHandler: React.FC = () => {
             },  
         });  
   
+        // AutoConfirm 옵션 추가  
+        const connectHeadersWithAutoConfirm: StompHeaders = {  
+            ...stompClient.connectHeaders,  
+            'x-queue-type': 'quorum',  
+            autoConfirm: true,  
+        };  
+  
         stompClient.onConnect = () => {  
             console.log('STOMP connected');  
             stompClient.subscribe(stompTopic, (frame) => {  
                 const newMessage = `STOMP - Message: ${frame.body}`;  
                 setMessages((prevMessages) => [...prevMessages, newMessage]);  
-            });  
+            }, connectHeadersWithAutoConfirm);  
         };  
   
         stompClient.onStompError = (frame) => {  
