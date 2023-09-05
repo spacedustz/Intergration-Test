@@ -119,11 +119,6 @@ A repository for All Types of Implementation Tests
 
 <br>
 
-**Web Socket**
-- [WebSocket을 이용한 MQTT Data 받기 (RabbitMQ)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Socket/WebSocket.md)
-
-<br>
-
 **TypeScript**
 - [TypeScript 환경 세팅](https://github.com/spacedustz/Intergration-Test/blob/main/Description/TypeScript/Setup.md)
 - [TypeScript 총정리 Summary (업데이트 중)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/TypeScript/Summary.md)
@@ -132,5 +127,10 @@ A repository for All Types of Implementation Tests
 
 ---
 
-## 3. 다른 프로젝트 (준비 중)
-**📂Directory📂** -> None
+## 3. RabbitMQ & MQTT & WebSocket
+**📂Directory📂** -> React-TS
+
+**RabbitMQ & MQTT & Web Socket**
+- [WebSocket을 이용한 MQTT Data 받기 (RabbitMQ)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Socket/WebSocket.md)
+- RabbitMQ Dead-Letter-Exchange 설정
+- RabbitMQ 성능 개선 & 로깅
