@@ -193,7 +193,7 @@ Topic Exchange는 `*`와 `#`을 이용해 와일드 카드를 표현할 수 있�
 
 ---
 
-## **😯 Default Exchange로 들어오는 데이터를 직접 만든 Exchange로 데이터 라우팅하기**
+## 😯 Default Exchange로 들어오는 데이터를 직접 만든 Exchange로 데이터 라우팅
 
 RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본으로 만들어져 있는 `amq.topic` Exchange로 갑니다.
 
@@ -206,7 +206,7 @@ RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본�
 
 ---
 
-## **😯 만약 Queue에 보존된 메시지를 RabbitMQ 서버를 재 시작 했을 때에도 보존하고 싶을 경우 아래와 같이 Exchange <-> Queue 바인딩**
+## 😯 만약 Queue에 보존된 메시지를 RabbitMQ 서버를 재 시작 했을 때에도 보존하고 싶을 경우
 
 **~~1번 방법~~ (안먹힘)**
 
