@@ -188,7 +188,7 @@ Topic Exchange는 `*`와 `#`을 이용해 와일드 카드를 표현할 수 있�
 - Queue 탭으로 이동 후 만든 큐의 이름 클릭
 - 하단의 Bindings 섹션에서 Bind from an Exchange 옵션 선택
 - From Exchange 필드에 앞서 만든 Exchange의 이름 입력
-- Routing Key 필드에 MQTT Topic Pattern 입력 (ex: test/topic)
+- Routing Key 필드에 MQTT Topic 입력 ( MQTT 데이터를 내보내는 곳에서 설정한 토픽으로 설정)
 - Bind 클릭
 
 ---
