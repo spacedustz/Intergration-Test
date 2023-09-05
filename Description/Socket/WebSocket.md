@@ -16,8 +16,11 @@
 
 **🫡 내용 수정 & 추가**
 
-- Topic Message의 Persistent를 설정하는 방법을 Quorum Queue를 사용하는 것으로 변경
+Queue에 쌓인 Message의 영속성(Persistent & Delivery Mode)을 지정하는 방식 변경
+
+- Topic Message의 Persistent Header를 수정해서 설정하는 방법 대신 Quorum Queue를 사용하는 것으로 변경
 - RabbitMQ 3.11 부터 Quorum Queue 사용 시 Message의 Persistent 옵션이 기본으로 Delivery Mode 2가 되고 메모리 저장이 아닌 디스크 저장 방식
+- Quorum Queue의 대표적인 장점은 **고가용성**이라서 RabbitMQ 클러스터의 노드를 증설하고 RabbitMQ 노드 간 통신 및 동기화 작업 필요
 - Client(React)에서 Stomp의 헤더에 autoConfirm의 값을 true로 넘겨야 소켓 연결이 안끊김
 - Client (React) 코드에 Quorum Queue의 Auto Confirm 헤더 추가함
 
@@ -188,9 +191,9 @@ Topic Exchange는 `*`와 `#`을 이용해 와일드 카드를 표현할 수 있�
 - Routing Key 필드에 MQTT Topic Pattern 입력 (ex: test/topic)
 - Bind 클릭
 
-<br>
+---
 
-> **😯 Default Exchange로 들어오는 데이터를 직접 만든 Exchange로 데이터 라우팅하기**
+## **😯 Default Exchange로 들어오는 데이터를 직접 만든 Exchange로 데이터 라우팅하기**
 
 RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본으로 만들어져 있는 `amq.topic` Exchange로 갑니다.
 
@@ -201,9 +204,9 @@ RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본�
 
 [RabbitMQ Topolozy 구성 좋은 글 발견함](https://medium.com/@supermegapotter/rabbitmq-topology-guide-8427ebbe927f)
 
-<br>
+---
 
-> **😯 만약 Queue에 보존된 메시지를 RabbitMQ 서버를 재 시작 했을 때에도 보존하고 싶을 경우 아래와 같이 Exchange <-> Queue 바인딩**
+## **😯 만약 Queue에 보존된 메시지를 RabbitMQ 서버를 재 시작 했을 때에도 보존하고 싶을 경우 아래와 같이 Exchange <-> Queue 바인딩**
 
 **~~1번 방법~~ (안먹힘)**
 
@@ -218,6 +221,7 @@ RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본�
 **2번 방법 (이 방법 사용했음)**
 
 - Queue를 만들때 Quorum Queue로 생성합니다.
+- **Exchange와 바인딩할때 Argument로 `x-auto-confirm : true`로 설정합니다**
 - RabbitMQ 3.11 버전부터 쿼럼 큐의 메세지 저장방식의 Default는 디스크 저장입니다.
 - C:\Users계정명\AppData\Roaming\RabbitMQ\db\클러스터이름\quorum 에 데이터가 쌓입니다.
 - 단 Quorum Queue는 Confirm 방식이기 떄문에 Client(React)에서 autoConfirm 옵션을 True로 설정해야 합니다.
@@ -270,6 +274,9 @@ RabbitMQ와의 Socket 통신을 위해 @stomp/stompjs 패키지를 설치해줍�
 웹 소켓을 열고 RabbitMQ의 웹 소켓 플러그인의 포트인 15674,15675 둘중 하나에 `ws://URL/ws`로 연결해줍니다.
 
 나머지 코드는 Exchange와 Queue & Topic에 대한 설정입니다.
+
+<br>
+**Quorum Queue를 사용했으므로 Stomp Client Header에 `autoConfirm 옵션을 true`로 설정해주었습니다.**
 
 Exchange & Queue에 맞는 Routing Key와 Topic을 설정하고 출력하는 컴포넌트를 작성했습니다.
 
