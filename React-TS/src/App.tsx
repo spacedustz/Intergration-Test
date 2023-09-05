@@ -45,47 +45,47 @@ const App: React.FC = () => {
 
     return (
         <ContextProvider>
-            {/* Ref & State & Event */}
-            <div>
-                <AppBlock>
-                    <RefInput/>
-                    <ReactiveFC/>
-                </AppBlock>
-            </div>
+            {/*/!* Ref & State & Event *!/*/}
+            {/*<div>*/}
+            {/*    <AppBlock>*/}
+            {/*        <RefInput/>*/}
+            {/*        <ReactiveFC/>*/}
+            {/*    </AppBlock>*/}
+            {/*</div>*/}
 
-            {/* Reducer & Input Form */}
-            <div>
-                <AppBlock>
-                    <Counter/>
-                    <CounterForm onSubmit={onSubmit}/>
-                </AppBlock>
-            </div>
+            {/*/!* Reducer & Input Form *!/*/}
+            {/*<div>*/}
+            {/*    <AppBlock>*/}
+            {/*        <Counter/>*/}
+            {/*        <CounterForm onSubmit={onSubmit}/>*/}
+            {/*    </AppBlock>*/}
+            {/*</div>*/}
 
-            {/* Context */}
-            <div>
-                <ReducerContext>
-                    <AppBlock>
-                        <CounterReducer/>
-                    </AppBlock>
-                </ReducerContext>
-            </div>
+            {/*/!* Context *!/*/}
+            {/*<div>*/}
+            {/*    <ReducerContext>*/}
+            {/*        <AppBlock>*/}
+            {/*            <CounterReducer/>*/}
+            {/*        </AppBlock>*/}
+            {/*    </ReducerContext>*/}
+            {/*</div>*/}
 
-            {/* Styled Component */}
-            <div>
-                <AppBlock>
-                    <Circle color="blue" size/>
-                </AppBlock>
-                <AppBlock>
-                    <Button>Button</Button>
-                </AppBlock>
-            </div>
+            {/*/!* Styled Component *!/*/}
+            {/*<div>*/}
+            {/*    <AppBlock>*/}
+            {/*        <Circle color="blue" size/>*/}
+            {/*    </AppBlock>*/}
+            {/*    <AppBlock>*/}
+            {/*        <Button>Button</Button>*/}
+            {/*    </AppBlock>*/}
+            {/*</div>*/}
 
             {/* Zustand Item List Statement */}
-            <div>
-                <AppBlock>
+            {/*<div>*/}
+            {/*    <AppBlock>*/}
 
-                </AppBlock>
-            </div>
+            {/*    </AppBlock>*/}
+            {/*</div>*/}
 
             <div>
                 <AppBlock>

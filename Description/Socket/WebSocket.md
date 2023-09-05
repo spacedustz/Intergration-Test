@@ -47,6 +47,8 @@ Erlang을 설치하는 이유는 RabbitMQ가 Erlang으로 만들어져 있기 �
 
 Erlang을 **관리자 권한**으로 설치 했으면 이제 RabbitMQ를 설치합니다.
 
+<br>
+
 RabbitMQ도 **관리자 권한**으로 설치합니다.
 
 [RabbitMQ 설치](https://www.rabbitmq.com/install-windows.html)
@@ -280,54 +282,87 @@ RabbitMQ와의 Socket 통신을 위해 @stomp/stompjs 패키지를 설치해줍�
 
 Exchange & Queue에 맞는 Routing Key와 Topic을 설정하고 출력하는 컴포넌트를 작성했습니다.
 
+Subscribe 해제는 별도의 버튼을 만들었는데, 이유는 RabbitMQ에서 데이터의 영속성 테스트를 할때 편하게 하려고 만들었습니다.
+
 ```tsx
 import React, { useEffect, useState } from 'react';  
-import {Client, StompHeaders} from '@stomp/stompjs';  
+import { Client, StompHeaders } from '@stomp/stompjs';  
   
-const RabbitMqWebSocketHandler: React.FC = () => {  
+interface RabbitMqWebSocketHandlerState {  
+    messages: string[];  
+    subscribed: boolean;  
+    client: Client;  
+}  
+  
+const RabbitMqWebSocketHandler: React.FC<RabbitMqWebSocketHandlerState> = () => {  
     const [messages, setMessages] = useState<string[]>([]);  
-    const stompBrokerUrl = 'ws://localhost:15674/ws';  
-    const stompTopic = 'q.frame'; // RabbitMQ의 Queue 이름에 맞게 설정  
+    const [subscribed, setSubscribed] = useState(false);  
+    const [client, setClient] = useState<Client>();  
   
+    // Life Cycle Hooks  
     useEffect(() => {  
-        // STOMP 클라이언트 설정  
-        const stompClient = new Client({  
-            brokerURL: stompBrokerUrl,  
+        subscribeToQueue();  
+        return () => {  
+            unSubscribeFromQueue();  
+        };  
+    }, []);  
+  
+    // 구독 함수  
+    const subscribeToQueue = () => {  
+        const client = new Client({  
+            brokerURL: 'ws://localhost:15674/ws',  
+  
+            // RabbitMQ 관리 콘솔 인증 정보  
             connectHeaders: {  
                 login: 'guest',  
-                passcode: 'guest', // RabbitMQ의 인증 정보에 맞게 설정  
+                passcode: 'guest',  
             },  
             debug: (str: string) => {  
                 console.log(str);  
             },  
         });  
   
-        // AutoConfirm 옵션 추가  
+        // Stomp Client Header - AutoConfirm, Message TTL 옵션 추가  
         const connectHeadersWithAutoConfirm: StompHeaders = {  
-            ...stompClient.connectHeaders,  
+            ...client.connectHeaders,  
             'x-queue-type': 'quorum',  
+            'x-message-ttl': 200000,  
             autoConfirm: true,  
         };  
   
-        stompClient.onConnect = () => {  
-            console.log('STOMP connected');  
-            stompClient.subscribe(stompTopic, (frame) => {  
-                const newMessage = `STOMP - Message: ${frame.body}`;  
-                setMessages((prevMessages) => [...prevMessages, newMessage]);  
-            }, connectHeadersWithAutoConfirm);  
+        // Quorum Queue Subscribe  
+        client.onConnect = () => {  
+            console.log('Socket Connected');  
+            // 1번째 파라미터로 Queue 이름, 2번째는 콜백 함수  
+            client.subscribe('q.frame', (frame) => {  
+                    const newMessage = `Test - Message: ${frame.body}`;  
+                    setMessages((prevMessages) => [...prevMessages, newMessage]);  
+                },  
+                {  
+                    id: 'Test-Subscribe',  
+                    ...connectHeadersWithAutoConfirm,  
+                });  
+            setSubscribed(true);  
         };  
   
-        stompClient.onStompError = (frame) => {  
+        // 오류 메시지의 세부 정보 출력  
+        client.onStompError = (frame) => {  
             console.error('STOMP error', frame.headers['message']);  
+            console.log('Error Details:', frame.body);  
         };  
   
-        stompClient.activate();  
+        setClient(client);  
+        client.activate();  
+    };  
   
-        // 컴포넌트 언마운트 시 클라이언트 연결 해제  
-        return () => {  
-            stompClient.deactivate();  
-        };  
-    }, []);  
+    // 구독 해제 함수, 버튼을 클릭하면 구독을 해제함  
+    const unSubscribeFromQueue = () => {  
+        if (client) {  
+            client.unsubscribe('Test-Subscribe');  
+            setClient(null);  
+            setSubscribed(false);  
+        }  
+    };  
   
     return (  
         <div>  
@@ -339,6 +374,12 @@ const RabbitMqWebSocketHandler: React.FC = () => {
                     </li>  
                 ))}  
             </ul>  
+            {!subscribed ? (  
+                <button onClick={subscribeToQueue}>Subscribe</button>  
+            ) : (  
+                // 구독 중일 때 해지 버튼  
+                <button onClick={unSubscribeFromQueue}>Unsubscribe</button>  
+            )}  
         </div>  
     );  
 };  
