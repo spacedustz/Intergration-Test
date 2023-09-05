@@ -63,7 +63,7 @@ RabbitMQ도 **관리자 권한**으로 설치합니다.
 
 1. 윈도우 검색창에 **시스템 환경**까지만 검색하면 **시스템 환경 변수 편집** 메뉴가 나옵니다.
 
-2. 클릭해서 열어주고 제일 하단의 **환경 변수(N)**를 클릭합니다.
+2. 클릭해서 열어주고 제일 하단의 **환경 변수(N)** 를 클릭합니다.
 
 3. 2개의 탭 중 **시스템 변수(S)** 부분에서 스크롤을 내려 **Path**를 찾아서 더블클릭 합니다.
 
@@ -71,7 +71,7 @@ RabbitMQ도 **관리자 권한**으로 설치합니다.
 
 <br>
 
-**윈도우 서버 재시작 시RabbitMQ 자동 실행(윈도우 서비스 등록) 설정**
+**윈도우 서버 재시작 시 RabbitMQ 자동 실행(윈도우 서비스 등록) 설정**
 
 1. 윈도우 CMD를 **관리자 권한**으로 엽니다.
 2. 환경변수로 등록한 RabbitMQ의 sbin 폴더로 이동해줍니다.
@@ -164,6 +164,8 @@ Publish/Subscribe 패턴을 구현하기 위해 Exchange의 타입을 Topic으�
 
 Topic Exchange는 Binding Key 패턴이 일치하는 Queue에만 선택적으로 데이터를 전송합니다.
 
+<br>
+
 Topic Exchange는 `*`와 `#`을 이용해 와일드 카드를 표현할 수 있습니다.
 
 - `*` : 단어 하나 일치
@@ -171,7 +173,7 @@ Topic Exchange는 `*`와 `#`을 이용해 와일드 카드를 표현할 수 있�
 
 <br>
 
-**Exchanges 생성**
+**Exchange 생성**
 - Name: Exchange 이름
 - Type : 보통 "Topic"을 선택 (MQTT Topic Routing에 가장 적함함)
 - Durable 설정 (Transient로 설정 시 RabbitMQ 재시작 하면 Exchange가 사라집니다.)
@@ -179,7 +181,8 @@ Topic Exchange는 `*`와 `#`을 이용해 와일드 카드를 표현할 수 있�
 
 <br>
 
-**Queue** 생성
+**Queue 생성**
+- Type : Default for Virtual Host (저는 Quorum Queue를 사용 하였습니다)
 - Name: Queue 이름
 - Durable 설정 (Transient로 설정 시 RabbitMQ 재시작 하면 Queue가 사라집니다.)
 - Add Queue
@@ -201,8 +204,10 @@ RabbitMQ의 Default Binding 정책 때문에 Topic타입의 Exchange는 기본�
 
 그래서 Default Exchange로 들어오는 데이터를 위에서 직접 만든 Exchange로 데이터가 넘어가게 설정(바인딩)해줘야 합니다.
 
-- amq.topic Exchange로 들어가서 만든 **Exchange(Queue가 아님)**와 바인딩을 해줍니다.
+- amq.topic Exchange로 들어가서 만든 **Exchange(Queue가 아님)** 와 바인딩을 해줍니다.
 - amq.topic Exchange의 Binding 섹션에서 **To Exchange**를 선택하고 Routing Key로 `#`을 입력해서 기본 Exchange -> 만든 Exchange로 데이터가 넘어가게 해줍니다.
+
+<br>
 
 [RabbitMQ Topolozy 구성 좋은 글 발견함](https://medium.com/@supermegapotter/rabbitmq-topology-guide-8427ebbe927f)
 
