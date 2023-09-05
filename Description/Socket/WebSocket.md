@@ -403,6 +403,26 @@ RabbitMQ의 소켓 포트인 15674 포트를 확인해보면 양방향으로 Est
 
 간단하게 MQTT 데이터를 RabbitMQ를 통해 Queue로 받아서 프론트엔드에서 실시간 통신을 해보았습니다.
 
+---
+## 🫡 Topic Message Persist(데이터 영속성) 테스트
+
+Topic Message가 RabbitMQ 재기동 했을시 사라지지 않고, 추가 데이터도 잘 받아지는지 확인하였습니다.
+
+- Subscriber (React) 중지
+- MQTT -> RabbitMQ로 쿼럼 큐에 데이터 쌓임
+- RabbitMQ 재기동 -> 데이터 살아있음
+- Subscriber ON (큐에 쌓인 데이터 전체 출력 완료)
+- 다시 MQTT 데이터 추가로 내보내기
+- Subscriber (React) 에 정상 도착
+
+<br>
+
+아래 사진을 보면,
+
+MQTT 영상 분석 데이터 중 Frame ID가 260에서 끊겼다가 추가 데이터 전송 후 다시 0으로 시작하는 것을 볼 수 있습니다.
+
+![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/rabbit-test.png)
+
 <br>
 
 테스트는 완료했으니 다음 글에서는 데이터를 백엔드에서 받고,
