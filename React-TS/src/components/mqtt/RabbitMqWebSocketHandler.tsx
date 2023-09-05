@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Client } from '@stomp/stompjs';
+import {Client, StompHeaders} from '@stomp/stompjs';
 
 const RabbitMqWebSocketHandler: React.FC = () => {
     const [messages, setMessages] = useState<string[]>([]);
@@ -19,12 +19,19 @@ const RabbitMqWebSocketHandler: React.FC = () => {
             },
         });
 
+        // AutoConfirm 옵션 추가
+        const connectHeadersWithAutoConfirm: StompHeaders = {
+            ...stompClient.connectHeaders,
+            'x-queue-type': 'quorum',
+            autoConfirm: true,
+        };
+
         stompClient.onConnect = () => {
             console.log('STOMP connected');
             stompClient.subscribe(stompTopic, (frame) => {
                 const newMessage = `STOMP - Message: ${frame.body}`;
                 setMessages((prevMessages) => [...prevMessages, newMessage]);
-            });
+            }, connectHeadersWithAutoConfirm);
         };
 
         stompClient.onStompError = (frame) => {
