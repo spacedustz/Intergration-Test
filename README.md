@@ -138,5 +138,5 @@ A repository for All Types of Implementation Tests
 
 **RabbitMQ & MQTT & Web Socket**
 - [WebSocket을 이용한 MQTT Data 받기 (RabbitMQ)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Socket/WebSocket.md)
-- RabbitMQ Dead-Letter-Exchange 설정
+- [RabbitMQ Dead-Letter-Exchange 설정](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Socket/WebSocket.md)
 - RabbitMQ 성능 개선 & 로깅
