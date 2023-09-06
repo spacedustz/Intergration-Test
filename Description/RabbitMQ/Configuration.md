@@ -100,12 +100,16 @@
 - 윈도우의 시스템 환경 변수 편집 으로 들어갑니다.
 - **시스템 변수**가 아닌 **사용자 변수**에 **새로만들기**를 눌러줍니다.
 
+<br>
+
 |변수 이름|변수 값|
 |---|---|
 |`RABBITMQ_BASE`|RabbitMQ의 데이터를 저장할 경로 `(ex: E:\Data\RabbitMQ)`|
 |`RABBITMQ_CONFIG_FILES`|RabbitMQ의 데이터를 저장할 경로 + conf 파일 이름 `(ex:E:\Data\RabbitMQ\rabbit.conf)`|
 
-추가 후 RabbitMQ 서버를 실행 해보면, `E:\Data\RabbitMQ` 폴더에 log, db 폴더가 생기고 로그 파일과 데이터들이 잘 생긴 걸 확인 할 수 있습니다.
+<br>
+
+환경 변수 추가 후 RabbitMQ 서버를 실행 해보면, `E:\Data\RabbitMQ` 폴더에 log, db 폴더가 생기고 로그 파일과 데이터들이 잘 생긴 걸 확인 할 수 있습니다.
 
 **Config Files**가 None이 나오는 이유는, 아직 Conf 파일을 작성 안 했기 때문입니다. Conf 파일은 좀 더 뒤에서 작성해 보겠습니다.
 
