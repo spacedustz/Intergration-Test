@@ -59,7 +59,7 @@
 - 기존 RabbitMQ 삭제하고 아래 내용 중 `😊 RabbitMQ 기준 경로 (RABBITMQ_BASE) 변경` 까지만 진행하고 다시 Rabbit을 설치하고 진행해야 합니다.
 - 왜냐하면 이미 설치된 상태에서 환경 변수를 바꿔줘도 안 먹히기 때문에 저도 재 설치 후 변수가 잘 적용되었습니다.
 
-<br>
+---
 
 **😊 Windows 환경에서 RabbitMQ의 Default Log, Config, Data의 기본 위치, 파일은 아래와 같습니다.**
 
@@ -71,7 +71,7 @@
 
 기본 경로를 사용해도 되지만 데이터,로그,설정 파일은 별도의 디렉터리에 관리하는게 편하니 바꿔보겠습니다.
 
-<br>
+---
 
 **😊 사용할 방법**
 
@@ -80,7 +80,7 @@
 - 기본 경로를 변경함으로써 환경변수 설정 파일이 없어도 지정된 경로에서 실행
 - Log나 DB등의 경로를 지정하지 않아도 해당 경로에 생성됩니다.
 
-<br>
+---
 
 **😊 RabbitMQ 기준 경로 (RABBITMQ_BASE) 변경**
 
@@ -93,7 +93,7 @@
 
 ![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/rabbit-log.png)
 
-<br>
+---
 
 **😊 RabbitMQ 환경 변수 파일 설정**
 
@@ -121,11 +121,22 @@ REM Log file location
 SET LOG_BASE=E:\Data\RabbitMQ\log
 ```
 
-위 배치 스크립트에서 로그,데이터 파일은 생성 됐지만 Conf 파일은 경로 지정만 하고 아직 작성을 안 했으니 Conf 파일도 작성해봅시다.
+<br>
+
+`RABBITMQ_BASE`를 통해 환경 설정을 하면 **지정된 경로**에 **지정된 파일명**으로 환경설정 파일들을 생성해야하는 단점이 있는데,
+
+아래와 같이 설정하면 파일명과 경로도 마음대로 지정할 수 있고, 아래 두개의 변수가 우선순위가 더 높기 때문에 가능합니다.
+ 
+- `set RABBITMQ_CONF_ENV_FILE=E:/Data/RabbitMQ/skw-rabbitmq-env-prod.bat`
+- `set RABBITMQ_CONFIG_FILE=E:/Data/RabbitMQ/skw-rabbitmq-prod.conf`
 
 <br>
 
-**😊 RabbitMQ Configuration 설정**
+위 배치 스크립트에서 로그,데이터 파일은 생성 됐지만, Conf 파일은 경로 지정만 하고 아직 작성을 안 했으니 Conf 파일도 작성해봅시다.
+
+---
+
+**😊 RabbitMQ Configuration 파일 생성 & 설정**
 
 일단 로그 설정만 적용되게 하고 성능 관련 파라미터는 주석 처리 해 두었습니다.
 
