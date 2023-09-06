@@ -181,8 +181,6 @@ log.file.rotation.count = 7
 
 
 # ----- 성능 관련 파라미터 설정 -----
-
-
 ```
 
 <br>
