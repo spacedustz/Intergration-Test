@@ -1,0 +1,17 @@
+{
+  "events": [
+    {
+      "extra": {
+        "current_entries": 2,
+        "total_hits": 32
+      },
+      "id": "1c554a22-dd4f-4ce0-aeb6-1657b04c5cd0",
+      "label": "Crowding in area",
+      "type": "area_crowding"
+    }
+  ],
+  "frame_id": 770,
+  "frame_time": 25.666666666666668,
+  "system_date": "Thu Sep 7 09:42:28 2023",
+  "system_timestamp": 1694047348
+}
