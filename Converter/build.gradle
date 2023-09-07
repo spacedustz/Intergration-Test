@@ -45,10 +45,10 @@ dependencies {
     implementation 'org.bytedeco:javacv:1.5.9'
     implementation group: 'org.bytedeco', name: 'javacv-platform', version: '1.5.9'
 
-//    // RabbitMQ 추가
-//    implementation 'org.springframework.boot:spring-boot-starter-amqp'
-//
-//    // WebSocket 추가
+    // RabbitMQ 추가
+    implementation 'org.springframework.boot:spring-boot-starter-amqp'
+
+    // WebSocket 추가
 //    implementation 'org.springframework.boot:spring-boot-starter-websocket'
 }
 
