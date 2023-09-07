@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 public class RabbitService {
     private static final Logger log = LoggerFactory.getLogger(RabbitService.class);
     private final RabbitTemplate template;
+    private final SimpMessagingTemplate messagingTemplate;
     private final String topic = "message";
 
     // 메시지 전송 테스트
@@ -28,6 +30,7 @@ public class RabbitService {
     // Subscribe
     @RabbitListener(queues = "qq.frame")
     public void consume(String message) {
+        messagingTemplate.convertAndSend("message", message);
         log.info("Received Message {}", message);
         System.out.println("Received Message {}" + message);
     }
