@@ -94,6 +94,7 @@ public class RabbitConfig {
         final SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
         factory.setMessageConverter(converter());
+        factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
 
         return factory;
     }
