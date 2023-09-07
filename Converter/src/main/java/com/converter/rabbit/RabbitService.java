@@ -1,0 +1,34 @@
+package com.converter.rabbit;
+
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.amqp.rabbit.annotation.RabbitListener;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
+import org.springframework.stereotype.Service;
+
+@Service
+@Transactional
+@RequiredArgsConstructor
+public class RabbitService {
+    private static final Logger log = LoggerFactory.getLogger(RabbitService.class);
+    private final RabbitTemplate template;
+    private final String topic = "message";
+
+    // 메시지 전송 테스트
+    public void send(RabbitDTO message) {
+        try {
+            template.convertAndSend("xx.frame", "qq.frame", message);
+        } catch (Exception e) {
+            log.error("RabbitMQ 메시지 전송 테스트 실패", e);
+        }
+    }
+
+    // Subscribe
+    @RabbitListener(queues = "qq.frame")
+    public void consume(String message) {
+        log.info("Received Message {}", message);
+        System.out.println("Received Message {}" + message);
+    }
+}
