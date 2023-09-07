@@ -6,6 +6,7 @@ server:
   port: 8080
 
 spring:
+  # H2 설정
   h2:
     console:
       enabled: true
@@ -13,6 +14,7 @@ spring:
   datasource:
     url: jdbc:h2:mem:test
 
+  # JPA 설정
   jpa:
     hibernate:
       ddl-auto: create
@@ -20,6 +22,16 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
+    template:
+      exchange: x.frame
+      default-receive-queue: q.frame
+      routing-key: message
 
 # Logging
 logging:
