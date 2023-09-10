@@ -103,7 +103,7 @@ Slave가 있어도 Producer의 모든 Message는 오직 Master Queue로만 전�
 
 ---
 
-## 클러스터링 구현
+## Clustering & Mirroring 구현
 
 📕 **1번 방법 : Config  파일에 클러스터 노드 선언**
 
@@ -163,8 +163,62 @@ rabbitmq-plugins enable rabbitmq_shovel_management
 
 📕 **3번 방법 : CLI로 직정 클러스터 생성**
 
-```bash
-rabbitmqctl cluster_create rabbit
+- Windows 서버의 4대 RabbitMQ 인스턴스와 Linux 서버의 RabbitMQ 인스턴스 간에 클러스터를 구성합니다.
+- 모든 RabbitMQ 인스턴스가 동일한 Erlang Cookie 값을 가지도록 설정합니다. 이 값은 노드간 통신을 위해 사용됩니다.
+- 각 노드에서 `rabbitmqctl` 명령어를 사용하여 클러스터를 설정합니다.
+
+```javascript
+rabbitmqctl stop_app
+rabbitmqctl reset
+rabbitmqctl join_cluster --ram rabbit@<윈도우_노드_이름>
+rabbitmqctl start_app
 ```
+
+- 위 명령어는 Linux 서버의 RabbitMQ 노드가 윈도우 서버의 한 노드에 참여하도록 합니다.
+
+<br>
+
+**Exchange 및 Queue 설정**
+
+- Windows 서버의 4대 RabbitMQ 인스턴스 각각에서 다른 Exchange 및 Queue(Master Queue)를 생성합니다.
+
+```bash
+# Exchange 생성
+rabbitmqadmin declare exchange name=<exchange_name> type=<exchange_type>
+
+# Queue 생성
+rabbitmqadmin declare queue name=<queue_name> durable=true
+
+# Exchange와 Queue 바인딩
+rabbitmqadmin declare binding source=<exchange_name> destination_type=queue destination=<queue_name>
+```
+
+<br>
+
+**Mirroring 설정**
+
+- Linux 서버의 RabbitMQ 인스턴스에서 Windows 서버의 Master Queue들을 Mirroring하기 위해 정책(policy)을 설정합니다.
+
+```bash
+# 정책(Policy) 생성 (Mirroring)
+rabbitmqctl set_policy ha-all "^master\." '{"ha-mode":"all"}' --priority=1 --apply-to=queues
+
+# 정책 확인 (Mirroring)
+rabbitmqctl list_policies
+```
+
+<br>
+
+**Backend 데이터 처리**
+
+- Linux 서버에서 Backend 애플리케이션을 개발하고, Slave Queue들을 Subscribe하여 데이터 변환 및 필요한 처리 작업 수행 후 DB에 저장합니다.
+
+<br>
+
+Frontend 데이터 표시:
+
+- Frontend 애플리케이션에서 Backend로부터 MQTT, JSON, CSV 등으로 변환된 데이터를 받아와 차트 등으로 표시하는 로직을 개발합니다.
+
+<br>
 
 내용 추가 중..
