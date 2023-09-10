@@ -161,7 +161,7 @@ rabbitmq-plugins enable rabbitmq_shovel_management
 
 ---
 
-📕 **3번 방법 : CLI로 직정 클러스터 생성**
+📕 **3번 방법 : CLI로 클러스터 생성**
 
 - Windows 서버의 4대 RabbitMQ 인스턴스와 Linux 서버의 RabbitMQ 인스턴스 간에 클러스터를 구성합니다.
 - 모든 RabbitMQ 인스턴스가 동일한 Erlang Cookie 값을 가지도록 설정합니다. 이 값은 노드간 통신을 위해 사용됩니다.
