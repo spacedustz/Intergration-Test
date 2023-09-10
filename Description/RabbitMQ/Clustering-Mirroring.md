@@ -163,6 +163,8 @@ rabbitmq-plugins enable rabbitmq_shovel_management
 
 📕 **3번 방법 : CLI로 클러스터 생성**
 
+[RabbitMQ 공식 문서](https://www.rabbitmq.com/clustering.html#starting)
+
 - Windows 서버의 4대 RabbitMQ 인스턴스와 Linux 서버의 RabbitMQ 인스턴스 간에 클러스터를 구성합니다.
 - 모든 RabbitMQ 인스턴스가 동일한 Erlang Cookie 값을 가지도록 설정합니다. 이 값은 노드간 통신을 위해 사용됩니다.
 - 각 노드에서 `rabbitmqctl` 명령어를 사용하여 클러스터를 설정합니다.
@@ -215,7 +217,7 @@ rabbitmqctl list_policies
 
 <br>
 
-Frontend 데이터 표시:
+**Frontend 데이터 표시**
 
 - Frontend 애플리케이션에서 Backend로부터 MQTT, JSON, CSV 등으로 변환된 데이터를 받아와 차트 등으로 표시하는 로직을 개발합니다.
 
