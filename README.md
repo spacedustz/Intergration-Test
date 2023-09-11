@@ -134,9 +134,19 @@ A repository for All Types of Implementation Tests
 ## 3. RabbitMQ & MQTT & WebSocket
 **📂Directory📂** -> React-TS
 
+**RabbitMQ의 Clustering & Mirroring을 사용해 Web Socket 통신 구현**
+- 같은 네트워크에 있는 5개의 서버(WIndows 4, Linux1)에 각각의 RabbitMQ를 설치 해야 함.
+- WIndows 서버에 있는 4대의 RabbitMQ + 관리서버(Linux) +1로 클러스터링
+- WIndows 서버의 Rabbit은 각각 다른 Exchange/Queue (Master Queue)를 가진다
+- Linux 서버의 RabbitMQ는 Windows Rabbit의 각 Queue의 Mirroring인 Slave Queue를 둔다.
+- Linux 서버의 Backend 에서 Slave Queue들을 Subscribe하고 데이터를 필요에 따라 변환, DB에 저장 한다.
+- Frontend에서 Backend의 소켓에 접속해 변환된 MQTT, Json, CSV데이터를 차트에 뿌려 차트를 변화시킨다.
+
 <br>
 
 **RabbitMQ & MQTT & Web Socket**
 - [WebSocket을 이용한 MQTT Data 받기 (RabbitMQ)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Socket/WebSocket.md)
 - [RabbitMQ Dead-Letter-Exchange 설정](https://github.com/spacedustz/Intergration-Test/blob/main/Description/RabbitMQ/Dead-Letter-Exchange.md)
 - [RabbitMQ Configuration 설정 (성능 개선 & 로깅)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/RabbitMQ/Configuration.md)
+- [Red Hat 기반 RabbitMQ & Spring RabbitMQ 구성](https://github.com/spacedustz/Intergration-Test/blob/main/Description/RabbitMQ/RedHat.md)
+- [RabbitMQ Clustering & Mirroring](https://github.com/spacedustz/Intergration-Test/blob/main/Description/RabbitMQ/Clustering-Mirroring.md)
