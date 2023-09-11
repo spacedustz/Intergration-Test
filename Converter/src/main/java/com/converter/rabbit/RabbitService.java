@@ -21,14 +21,14 @@ public class RabbitService {
     // 메시지 전송 테스트
     public void send(RabbitDTO message) {
         try {
-            template.convertAndSend("xx.frame", "qq.frame", message);
+            template.convertAndSend("x.frame", "qq.frame", message);
         } catch (Exception e) {
             log.error("RabbitMQ 메시지 전송 테스트 실패", e);
         }
     }
 
     // Subscribe
-    @RabbitListener(queues = "qq.frame")
+    @RabbitListener(queues = "q.frame")
     public void consume(String message) {
         messagingTemplate.convertAndSend("message", message);
         log.info("Received Message {}", message);
