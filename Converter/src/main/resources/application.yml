@@ -23,6 +23,7 @@ spring:
       hibernate:
         format_sql: true
 
+  # RabbitMQ 설정
   rabbitmq:
     host: localhost
     port: 5672
@@ -32,6 +33,12 @@ spring:
       exchange: xx.frame
       default-receive-queue: qq.frame
       routing-key: message
+
+  # Redis 설정
+  data:
+    redis:
+      host: localhost
+      port: 6379
 
 # Logging
 logging:
