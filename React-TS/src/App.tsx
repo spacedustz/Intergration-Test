@@ -11,6 +11,7 @@ import ReducerContext from "./components/context/ReducerContext";
 import styled, {css} from "styled-components";
 import Button from "./components/style/GlobalStyledBotton";
 import RabbitMqWebSocketHandler from "./components/mqtt/RabbitMqWebSocketHandler";
+import RedisSocketSubscriber from "./components/mqtt/RedisSocketSubscriber";
 
 interface CircleProps {
     color?: string;
@@ -89,7 +90,8 @@ const App: React.FC = () => {
 
             <div>
                 <AppBlock>
-                    <RabbitMqWebSocketHandler />
+                    {/*<RabbitMqWebSocketHandler />*/}
+                    <RedisSocketSubscriber />
                 </AppBlock>
             </div>
         </ContextProvider>
