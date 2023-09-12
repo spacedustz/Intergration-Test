@@ -76,7 +76,20 @@ syslog-enabled no
 set-proc-title yes
 proc-title-template "{title} {listen-addr} {server-mode}"
 
-# ============================== SnapShot ========================================
+# ============================== Memory ==============================
+# 메모리 사용량 제한을 Byte 단위로 설정합니다.
+maxmemory <bytes>
+
+# 메모리 제한에 도달하면 Redis눈 메모리 정책에 맞는 키 제거를 시도합니다.
+# 캐시를 지우지 않는 메모리 정책입니다.
+# Memory Policies
+# 'noeviction' : SET, LPUSH 등 많은 메모리를 사용하는 명령들에 오류로 응답하기 시작합니다.
+# Memory Policy의 Default는 'noeviction' 입니다.
+maxmemory-policy noeviction
+
+# LRU 알고리즘
+
+# ============================== SnapShot ==============================
 # DB 덤프 파일 지정
 dbfilename {file-name}.rdb
 
@@ -202,6 +215,66 @@ tls-dh-params-file redis.dh
 
 
 ```
+
+<br>
+
+> 📕 **메모리 정책**
+
+메모리 정책은 `maxmemory-policy 설정값` 으로 정하면 됩니다. 
+
+이 값도 redis.conf 파일이나 config set 명령문으로 변경할 수 있습니다. 
+
+MAX MEMORY만큼 메모리를 사용하게 되면, 메모리 정책에 따라 과거에 만들어진 키들이 삭제됩니다.  
+
+<br>
+
+**📗 No Eviction 정책**
+- 캐시를 지우지 않는 메모리 정책**|메모리가 Max-Mem 이상을 사용하게 되면, 에러를 반환합니다.
+
+<br>
+
+**📗 ALL KEY 정책** 
+- allkeys-lru
+    - LRU 알고리즘을 기반으로 키를 삭제합니다. 
+	- 메모리 정책을 뭘로 설정해야하는지 애매모호하다.. 싶으면 이 정책을 사용하면 됩니다.
+- **allkey-random**
+    - 랜덤하게 키를 삭제합니다.
+- **allkeys-lfu**
+    - REDIS 4.0에서 추가된 정책이다. 가장 적게 사용된 키가 삭제된다.|
+
+<br>
+
+**📗 Volatile 정책**
+
+volatile은 EXPIRE SET에 있는 키들만 정리한다는 점에서, 모든 키를 정리하는 ALL KEY 메모리 정책과 상반됩니다. 
+
+**volatile-lru**
+- EXPIRE SET 안에 있는 키를 LRU 알고리즘을 기반으로 키를 삭제합니다.
+
+**volatile-random**
+- EXPIRE SET 안에 있는 키들을 랜덤하게 삭제합니다.
+
+**volatile-ttl**
+- EXPIRE SET 안에 있는 키들을 TTL이 짧은 순으로 삭제합니다. 
+
+**volatile-lfu** 
+- REDIS 4.0에서 추가된 정책이며, EXPIRE SET 안에 있는 키 중 가장 적게 사용된 키가 삭제됩니다.
+
+
+
+메모리 정책은 어플리케이션 특성에 맞게 설정하는게 좋습니다. 
+
+또, 메모리 정책은 Redis를 재시작하지 않고도 변경할 수 있습니다.
+
+그러니 라이브 환경에서 설정 값을 변경해보면서, 모니터링 후 설정 값을 튜닝 하는 것도 하나의 방법입니다.
+
+<br>
+
+> 📕 **LRU 알고리즘**
+
+`memory-samples` : Redis LRU 알고리즘을 이용한 오래된 데이터 삭제
+- `기본값은 5`로 설정되어 있고, 10에 가까울수록 실제 LRU 알고리즘과 유사해집니다.
+- 간단하게 0에 가까울수록 속도는 빨라지고 정확도는 떨어지고, 10에 가까울수록 정확도가 올라갑니다.
 
 ---
 ## Redis-Cli
