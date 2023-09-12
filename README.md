@@ -150,3 +150,8 @@ A repository for All Types of Implementation Tests
 - [RabbitMQ Configuration 설정 (성능 개선 & 로깅)](https://github.com/spacedustz/Intergration-Test/blob/main/Description/RabbitMQ/Configuration.md)
 - [Red Hat 기반 RabbitMQ & Spring RabbitMQ 구성](https://github.com/spacedustz/Intergration-Test/blob/main/Description/RabbitMQ/RedHat.md)
 - [RabbitMQ Clustering & Mirroring](https://github.com/spacedustz/Intergration-Test/blob/main/Description/RabbitMQ/Clustering-Mirroring.md)
+
+<br>
+
+**Redis**
+- [Publish/Subscribe Pattern](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Redis/Pub-Sub.md)
