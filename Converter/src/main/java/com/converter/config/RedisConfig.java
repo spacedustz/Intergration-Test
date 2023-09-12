@@ -30,7 +30,7 @@ public class RedisConfig {
 
     @Bean
     public MessageListenerAdapter listener(RedisSubscriber subscriber) {
-        return new MessageListenerAdapter(subscriber, "onMessage")
+        return new MessageListenerAdapter(subscriber, "onMessage");
     }
 
     // Redis Channel(Topic)로 부터 메시지를 받고, 주입된 리스너들에게 비동기로 Dispatch 하는 역할
