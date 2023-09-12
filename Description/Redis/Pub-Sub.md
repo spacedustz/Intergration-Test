@@ -138,6 +138,9 @@ implementation'org.springframework.boot:spring-boot-starter-data-redis'
 
 // WebSocket
 implementation 'org.springframework.boot:spring-boot-starter-websocket'
+
+// Project Reactor  
+implementation 'io.projectreactor.netty:reactor-netty-http'
 ```
 
 <br>
@@ -207,59 +210,59 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 - 공유를 위해 Channel Topic을 빈으로 등록해 단일화 시켜줍니다.
 
 ```java
-@Configuration  
-public class RedisConfig {  
-  
-    @Value("${spring.data.redis.host}")  
-    private String host;  
-  
-    @Value("${spring.data.redis.port}")  
-    private int port;  
-  
+@Configuration
+public class RedisConfig {
+
+    @Value("${spring.data.redis.host}")
+    private String host;
+
+    @Value("${spring.data.redis.port}")
+    private int port;
+
     // Redis 연결 설정  
-    @Bean  
-    public RedisConnectionFactory factory() {  
-        return new LettuceConnectionFactory(host, port);  
-    }  
-  
-    @Bean  
-    public MessageListenerAdapter listener(RedisSubscriber subscriber) {  
-        return new MessageListenerAdapter(subscriber, "onMessage");  
-    }  
-  
+    @Bean
+    public RedisConnectionFactory factory() {
+        return new LettuceConnectionFactory(host, port);
+    }
+
+    @Bean
+    public MessageListenerAdapter listener(RedisSubscriber subscriber) {
+        return new MessageListenerAdapter(subscriber, "onMessage");
+    }
+
     // Redis Channel(Topic)로 부터 메시지를 받고, 주입된 리스너들에게 비동기로 Dispatch 하는 역할  
     // Pub & Sub을 처리하는 Listener    
-    @Bean  
-    public RedisMessageListenerContainer listenerContainer() {  
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();  
-        container.setConnectionFactory(factory());  
-        return container;  
-    }  
-  
+    @Bean
+    public RedisMessageListenerContainer listenerContainer() {
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
+        container.setConnectionFactory(factory());
+        return container;
+    }
+
     // 어플리케이션에서 사용할 Redis Template    
-    @Bean  
-    public RedisTemplate<String, Object> template() {  
-        RedisTemplate<String, Object> template = new RedisTemplate<>();  
-        template.setConnectionFactory(factory());  
-        template.setKeySerializer(new StringRedisSerializer());  
-        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));  
-        return template;  
-    }  
-  
+    @Bean
+    public RedisTemplate<String, Object> template() {
+        RedisTemplate<String, Object> template = new RedisTemplate<>();
+        template.setConnectionFactory(factory());
+        template.setKeySerializer(new StringRedisSerializer());
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
+        return template;
+    }
+
     // 토큰 저장소로 사용할 Redis Template    
-    @Bean  
-    public RedisTemplate<?, ?> tokenRedisTemplate() {  
-        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();  
-        redisTemplate.setConnectionFactory(factory());  
-        redisTemplate.setKeySerializer(new StringRedisSerializer());  
-        redisTemplate.setValueSerializer(new StringRedisSerializer());  
-        return redisTemplate;  
-    }  
-  
-    @Bean  
-    ChannelTopic topic() {  
-        return new ChannelTopic("message");  
-    }  
+    @Bean
+    public RedisTemplate<?, ?> tokenRedisTemplate() {
+        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(factory());
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setValueSerializer(new StringRedisSerializer());
+        return redisTemplate;
+    }
+
+    @Bean
+    ChannelTopic topic() {
+        return new ChannelTopic("message");
+    }
 }
 ```
 
@@ -272,16 +275,16 @@ public class RedisConfig {
 Redis Template를 이용해 들어온 메시지를 변환하여 수신합니다.
 
 ```java
-@Slf4j  
-@Service  
-@RequiredArgsConstructor  
-public class RedisMessageReceiver {  
-  
-    private final RedisTemplate<String, Object> template;  
-  
-    public void receive(String message) {  
-        template.convertAndSend("channel", message);  
-    }  
+@Slf4j
+@Service
+@RequiredArgsConstructor
+public class RedisMessageReceiver {
+
+    private final RedisTemplate<String, Object> template;
+
+    public void receive(String message) {
+        template.convertAndSend("channel", message);
+    }
 }
 ```
 
@@ -290,19 +293,19 @@ public class RedisMessageReceiver {
 - Redis로부터 온 메시지를 역직렬화하여 메시지를 Topic 명과 함께 전달합니다.
 
 ```java
-@Service  
-@RequiredArgsConstructor  
-public class RedisSubscriber implements MessageListener {  
-  
-    private final RedisTemplate<String, Object> template;  
-  
+@Service
+@RequiredArgsConstructor
+public class RedisSubscriber implements MessageListener {
+
+    private final RedisTemplate<String, Object> template;
+
     // Redis로부터 온 메시지를 역직렬화 하여 메시지 전달  
-    @Override  
-    public void onMessage(Message message) {  
-        String publishMessage = template.getStringSerializer().deserialize(message.getBody());  
-        assert publishMessage != null;  
-        template.convertAndSend("/topic/message", publishMessage);  
-    }  
+    @Override
+    public void onMessage(Message message) {
+        String publishMessage = template.getStringSerializer().deserialize(message.getBody());
+        assert publishMessage != null;
+        template.convertAndSend("/topic/message", publishMessage);
+    }
 }
 ```
 
@@ -345,100 +348,100 @@ RabbitMQ의 쿼럼 큐는 메시지를 받고 ACK를 보내야 하는데 임시�
 Message-TTL과 Message-Type은 쿼럼 큐의 Arguments와 맟춰준 것이며, 안맟춰주면 소켓이 안열리게 됩니다.
 
 ```tsx
-import React, { useEffect, useState } from 'react';  
-import {Client, StompHeaders} from '@stomp/stompjs';  
-  
-interface RedisState {  
-    messages: string[];  
-    subscribed: boolean;  
-    client: Client;  
-}  
-  
-const RedisSocketSubscriber: React.FC<RedisState> = () => {  
-    const [messages, setMessages] = useState<string[]>([]);  
-    const [subscribed, setSubscribed] = useState(false);  
-    const [client, setClient] = useState<Client>();  
-  
+import React, { useEffect, useState } from 'react';
+import {Client, StompHeaders} from '@stomp/stompjs';
+
+interface RedisState {
+    messages: string[];
+    subscribed: boolean;
+    client: Client;
+}
+
+const RedisSocketSubscriber: React.FC<RedisState> = () => {
+    const [messages, setMessages] = useState<string[]>([]);
+    const [subscribed, setSubscribed] = useState(false);
+    const [client, setClient] = useState<Client>();
+
     // Life Cycle Hooks  
-    useEffect(() => {  
-        subscribeToRedis();  
-        return () => {  
-            unSubscribeFromRedis();  
-        };  
-    }, []);  
-  
+    useEffect(() => {
+        subscribeToRedis();
+        return () => {
+            unSubscribeFromRedis();
+        };
+    }, []);
+
     // 구독 함수  
-    const subscribeToRedis = () => {  
-        const client = new Client({  
-            brokerURL: 'ws://localhost:18080/ws',  
-  
-            debug: (str: string) => {  
-                console.log(str);  
-            },  
-        });  
-  
+    const subscribeToRedis = () => {
+        const client = new Client({
+            brokerURL: 'ws://localhost:18080/ws',
+
+            debug: (str: string) => {
+                console.log(str);
+            },
+        });
+
         // Stomp Client Header - AutoConfirm, Message TTL 옵션 추가  
-        const connectHeadersWithAutoConfirm: StompHeaders = {  
-            ...client.connectHeaders,  
-            'x-queue-type': 'quorum',  
-            'x-message-ttl': 200000,  
-            autoConfirm: true,  
-        };  
-  
+        const connectHeadersWithAutoConfirm: StompHeaders = {
+            ...client.connectHeaders,
+            'x-queue-type': 'quorum',
+            'x-message-ttl': 200000,
+            autoConfirm: true,
+        };
+
         // Quorum Queue Subscribe  
-        client.onConnect = () => {  
-            console.log('Socket Connected');  
-  
+        client.onConnect = () => {
+            console.log('Socket Connected');
+
             // 1번째 파라미터로 Queue 이름, 2번째는 콜백 함수  
-            client.subscribe('/topic/message', (frame) => {  
-                    const newMessage = `Test - Redis: ${frame.body}`;  
-                    setMessages((prevMessages) => [...prevMessages, newMessage]);  
-                },  
-                {  
-                    id: 'Test-Subscribe',  
-                    ...connectHeadersWithAutoConfirm,  
-                });  
-            setSubscribed(true);  
-        };  
-  
+            client.subscribe('/topic/message', (frame) => {
+                    const newMessage = `Test - Redis: ${frame.body}`;
+                    setMessages((prevMessages) => [...prevMessages, newMessage]);
+                },
+                {
+                    id: 'Test-Subscribe',
+                    ...connectHeadersWithAutoConfirm,
+                });
+            setSubscribed(true);
+        };
+
         // 오류 메시지의 세부 정보 출력  
-        client.onStompError = (frame) => {  
-            console.error('STOMP error', frame.headers['message']);  
-            console.log('Error Details:', frame.body);  
-        };  
-  
-        setClient(client);  
-        client.activate();  
-    };  
-  
+        client.onStompError = (frame) => {
+            console.error('STOMP error', frame.headers['message']);
+            console.log('Error Details:', frame.body);
+        };
+
+        setClient(client);
+        client.activate();
+    };
+
     // 구독 해제 함수, 버튼을 클릭하면 구독을 해제함  
-    const unSubscribeFromRedis = () => {  
-        if (client) {  
-            client.unsubscribe('Test-Subscribe');  
-            setClient(null);  
-            setSubscribed(false);  
-        }  
-    };  
-  
-    return (  
-        <div>  
-            <h2>Redis Subscriber</h2>  
-            <ul>  
-                {messages.map((message, index) => (  
-                    <li key={index}>  
-                        <p>{message}</p>  
-                    </li>  
-                ))}  
-            </ul>  
-            {!subscribed ? (  
-                <button onClick={subscribeToRedis}>Subscribe</button>  
-            ) : (  
+    const unSubscribeFromRedis = () => {
+        if (client) {
+            client.unsubscribe('Test-Subscribe');
+            setClient(null);
+            setSubscribed(false);
+        }
+    };
+
+    return (
+        <div>
+            <h2>Redis Subscriber</h2>
+            <ul>
+                {messages.map((message, index) => (
+                    <li key={index}>
+                        <p>{message}</p>
+                    </li>
+                ))}
+            </ul>
+            {!subscribed ? (
+                <button onClick={subscribeToRedis}>Subscribe</button>
+            ) : (
                 // 구독 중일 때 해지 버튼  
-                <button onClick={unSubscribeFromRedis}>Unsubscribe</button>  
-            )}  
-        </div>  
-    );  
-};  
-  
+                <button onClick={unSubscribeFromRedis}>Unsubscribe</button>
+            )}
+        </div>
+    );
+};
+
 export default RedisSocketSubscriber;
 ```
