@@ -154,4 +154,5 @@ A repository for All Types of Implementation Tests
 <br>
 
 **Redis**
+- [Redis Configuration 설정 & 기본 사용법](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Redis/Configuraton-Basie.md)
 - [Publish/Subscribe Pattern](https://github.com/spacedustz/Intergration-Test/blob/main/Description/Redis/Pub-Sub.md)
