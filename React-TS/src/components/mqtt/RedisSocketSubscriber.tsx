@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Client, StompHeaders } from '@stomp/stompjs';
+import {Client, StompHeaders} from '@stomp/stompjs';
 
 interface RedisState {
     messages: string[];
@@ -25,11 +25,6 @@ const RedisSocketSubscriber: React.FC<RedisState> = () => {
         const client = new Client({
             brokerURL: 'ws://localhost:18080/ws',
 
-            // RabbitMQ 관리 콘솔 인증 정보
-            // connectHeaders: {
-            //     login: 'guest',
-            //     passcode: 'guest',
-            // },
             debug: (str: string) => {
                 console.log(str);
             },
@@ -46,9 +41,10 @@ const RedisSocketSubscriber: React.FC<RedisState> = () => {
         // Quorum Queue Subscribe
         client.onConnect = () => {
             console.log('Socket Connected');
+
             // 1번째 파라미터로 Queue 이름, 2번째는 콜백 함수
-            client.subscribe('/sub', (frame) => {
-                    const newMessage = `Test - Message: ${frame.body}`;
+            client.subscribe('/topic/message', (frame) => {
+                    const newMessage = `Test - Redis: ${frame.body}`;
                     setMessages((prevMessages) => [...prevMessages, newMessage]);
                 },
                 {
