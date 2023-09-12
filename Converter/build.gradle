@@ -53,6 +53,8 @@ dependencies {
 
     // Redis 추가
     implementation('org.springframework.boot:spring-boot-starter-data-redis')
+
+    implementation 'io.projectreactor.netty:reactor-netty-http'
 }
 
 tasks.named('test') {
