@@ -2,19 +2,19 @@ package com.converter.redis;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
+import org.springframework.stereotype.Controller;
 
 import java.util.Objects;
 
-@RestController
-@RequestMapping("/redis")
+@Controller
 @RequiredArgsConstructor
 public class RedisController {
     private final RedisTemplate<String, Object> template;
 
-    @GetMapping("/mqtt")
+    @MessageMapping("/topic/message")
+    @SendTo("/topic/message")
     public String getData() {
         return Objects.requireNonNull(template.opsForValue().get("데이터")).toString();
     }
