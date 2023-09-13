@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {Client, StompHeaders} from '@stomp/stompjs';
+import {Client} from '@stomp/stompjs';
 
 interface RedisState {
     messages: string[];
@@ -31,12 +31,12 @@ const RedisSocketSubscriber: React.FC<RedisState> = () => {
         });
 
         // Stomp Client Header - AutoConfirm, Message TTL 옵션 추가
-        const connectHeadersWithAutoConfirm: StompHeaders = {
-            ...client.connectHeaders,
-            'x-queue-type': 'quorum',
-            'x-message-ttl': 200000,
-            autoConfirm: true,
-        };
+        // const connectHeadersWithAutoConfirm: StompHeaders = {
+        //     ...client.connectHeaders,
+        //     'x-queue-type': 'quorum',
+        //     'x-message-ttl': 200000,
+        //     autoConfirm: true,
+        // };
 
         // Quorum Queue Subscribe
         client.onConnect = () => {
@@ -49,7 +49,7 @@ const RedisSocketSubscriber: React.FC<RedisState> = () => {
                 },
                 {
                     id: 'Test-Subscribe',
-                    ...connectHeadersWithAutoConfirm,
+                    // ...connectHeadersWithAutoConfirm,
                 });
             setSubscribed(true);
         };
@@ -75,7 +75,7 @@ const RedisSocketSubscriber: React.FC<RedisState> = () => {
 
     return (
         <div>
-            <h2>RabbitMQ Listener</h2>
+            <h2>Redis Listener</h2>
             <ul>
                 {messages.map((message, index) => (
                     <li key={index}>
