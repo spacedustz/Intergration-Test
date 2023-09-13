@@ -147,10 +147,24 @@ implementation 'io.projectreactor.netty:reactor-netty-http'
 
 > 📕 **WebSocketConfig**
 
-- `WebSocketMessageBrokerConfigurer` : 인터페이스를 구현해 STOMP로 메시지 처리 구성합니다.
-- `configureMessageBroker` : 메시지를 중간에서 라우팅할 때 사용하는 메시지 브로커를 구성합니다.
-- `enableSimpleBrokerRelay` : 해당 주소를 구독하는 클라이언트에게 메시지를 보냅니다. 즉, 인자에는 구독 요청의 prefix를 넣고, 클라이언트에서 1번 채널을 구독하고자 할 때는 /sub/1 형식과 같은 규칙을 따라야 합니다.
-- `setApplicationDestinationPrefixes` : 메시지 발행 요청의 prefix를 넣습니다, /pub로 시작하는 메시지만 해당 Broker에서 받아서 처리하고, 클라이언트에서 WebSocket에 접속할 수 있는 endpoint를 지정합니다.
+`WebSocketMessageBrokerConfigurer` : 인터페이스를 구현해 STOMP로 메시지 처리 구성합니다.
+
+**configureMessageBroker() 함수** : 메시지를 중간에서 라우팅할 때 사용하는 메시지 브로커를 구성하는 함수입니다.
+- 보통 `/topic`, `/queue`를 사용합니다.
+- `/topic`은 한명이 Message를 발행했을 때 해당 토픽을 구독하고 있는 N명에게 메시지를 브로드캐스팅 할 때 사용합니다.
+- `/queue`는 한명이 Message를 발행했을 때 발행한 1명에게 다시 정보를 보내는 경우에 사용합니다.
+  `enableSimpleBrokerRelay`
+- 해당 주소를 구독하는 클라이언트에게 메시지를 보냅니다.
+- 즉, 인자에는 구독 요청의 prefix를 넣고, 클라이언트에서 1번 채널을 구독하고자 할 때는 /sub/1 형식과 같은 규칙을 따라야 합니다.
+  `setApplicationDestinationPrefixes`
+- 메시지 발행 요청의 prefix를 넣습니다.
+- /로 시작하는 메시지만 해당 Broker에서 받아서 처리하고, 클라이언트에서 WebSocket에 접속할 수 있는 endpoint를 지정합니다.
+- 만약 `/app`으로 설정한다면, 실제 구독 신청 URL은 `/app/topic`처럼 시작 URL을 지정합니다.
+
+<br>
+
+**registerStompEndpoints() 함수** : Socket Endpoint를 등록하는 함수입니다.
+- `ws`라는 Endpoint에 Interceptor를 추가해 Socket을 등록합니다.
 
 ```java
 @Configuration  
@@ -164,13 +178,78 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         config.enableStompBrokerRelay("/topic");  
   
         // 메시지 발행 요청할 때 사용  
-        config.setApplicationDestinationPrefixes("/pub");  
+        config.setApplicationDestinationPrefixes("/");  
     }  
   
     @Override  
     public void registerStompEndpoints(StompEndpointRegistry registry) {  
         // WebSocket 연결 엔드포인트 설정, ex) ws://localhost:18080/ws  
-        registry.addEndpoint("/ws").setAllowedOriginPatterns("*").withSockJS();  
+        registry  
+                .addEndpoint("/ws")  
+                .setAllowedOriginPatterns("http://localhost:3000")  
+                .addInterceptors(new HttpSessionHandshakeInterceptor());  
+    }  
+}
+```
+
+<br>
+
+> 📕 **HttpHandshakeInterceptor**
+
+- 웹소켓은 처음 Connect 시점에 Handshake라는 작업이 수행됩니다.
+- Handshake 과정은 HTTP 통신 기반으로 이루어지며 GET 방식으로 통신을 하게 됩니다.
+- 이때, HTTTP Request Header의 Connection 속성은 Upgrade로 되어야 합니다.
+- HTTP에 존재하는 Session을 WebSocket Session으로 등록합니다, SESSION 변수는 static 변수로 String 타입입니다.
+
+```java
+public class HttpHandshakeInterceptor implements HandshakeInterceptor {  
+    @Override  
+    public boolean beforeHandshake(ServerHttpRequest request,   
+                                   ServerHttpResponse response,   
+                                   WebSocketHandler wsHandler,   
+                                   Map<String, Object> attributes) throws Exception {  
+        if (request instanceof ServletServerHttpRequest servletRequest) {  
+            HttpSession session = servletRequest.getServletRequest().getSession();  
+            attributes.put(SESSION, session);  
+        }  
+        return true;  
+    }  
+  
+    @Override  
+    public void afterHandshake(ServerHttpRequest request,   
+                               ServerHttpResponse response,   
+                               WebSocketHandler wsHandler,   
+                               Exception exception) {}  
+}
+```
+
+<br>
+
+> 📕 **RedisController**
+
+- `@MessageMapping` 발행 경로를. `@SendTo` or `@SendToUser`를 사용하면 구독 경로를 지정합니다.
+- **@MessageMapping URL은** `WebSocketConfig`에서 설정한 DestinationPrefixes를 뺸 URL을 입력해주면 됩니다.
+- 만약 DestinationPrefixes를 `/app`이라고 가정하고 나머지 URL은 `/topic/message`라고 가정하면,
+- **ex) @MessageMapping("topic/message)" 처럼 `/app`을 뺸 나머지 URL을 입력하면 됩니다.**
+
+<br>
+
+- 즉, `@MessageMapping`에 설정한 URL로 클라이언트로부터 요청 메시지를 받으면, `@SendTo`로 설정한 URL을 구독한 클라이언트들에게 메시지를 보냅니다.
+- `@SendTo`는 1:N으로 메시지를 보낼때 사용하는 구조이며, 보통 경로가 `/topic`으로 시작합니다.
+- `@SendToUser` 는 보통 1:1로 메시지를 보낼때 사용하는 구조이며, 보통 경로가 `/queue`로 시작합니다.
+
+
+
+```java
+@Controller  
+@RequiredArgsConstructor  
+public class RedisController {  
+    private final RedisTemplate<String, Object> template;  
+  
+    @MessageMapping("/topic/message")  
+    @SendTo("/topic/message")  
+    public String getData() {  
+        return Objects.requireNonNull(template.opsForValue().get("데이터")).toString();  
     }  
 }
 ```
@@ -210,59 +289,47 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
 - 공유를 위해 Channel Topic을 빈으로 등록해 단일화 시켜줍니다.
 
 ```java
-@Configuration
-public class RedisConfig {
-
-    @Value("${spring.data.redis.host}")
-    private String host;
-
-    @Value("${spring.data.redis.port}")
-    private int port;
-
+@Configuration  
+public class RedisConfig {  
+  
+    @Value("${spring.data.redis.host}")  
+    private String host;  
+  
+    @Value("${spring.data.redis.port}")  
+    private int port;  
+  
     // Redis 연결 설정  
-    @Bean
-    public RedisConnectionFactory factory() {
-        return new LettuceConnectionFactory(host, port);
-    }
-
-    @Bean
-    public MessageListenerAdapter listener(RedisSubscriber subscriber) {
-        return new MessageListenerAdapter(subscriber, "onMessage");
-    }
-
+    @Bean  
+    public RedisConnectionFactory factory() {  
+        return new LettuceConnectionFactory(host, port);  
+    }  
+  
+    @Bean  
+    public MessageListenerAdapter listener(RedisSubscriber subscriber) {  
+        return new MessageListenerAdapter(subscriber, "onMessage");  
+    }  
+  
     // Redis Channel(Topic)로 부터 메시지를 받고, 주입된 리스너들에게 비동기로 Dispatch 하는 역할  
-    // Pub & Sub을 처리하는 Listener    
-    @Bean
-    public RedisMessageListenerContainer listenerContainer() {
-        RedisMessageListenerContainer container = new RedisMessageListenerContainer();
-        container.setConnectionFactory(factory());
-        return container;
-    }
-
-    // 어플리케이션에서 사용할 Redis Template    
-    @Bean
-    public RedisTemplate<String, Object> template() {
-        RedisTemplate<String, Object> template = new RedisTemplate<>();
-        template.setConnectionFactory(factory());
-        template.setKeySerializer(new StringRedisSerializer());
-        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));
-        return template;
-    }
-
-    // 토큰 저장소로 사용할 Redis Template    
-    @Bean
-    public RedisTemplate<?, ?> tokenRedisTemplate() {
-        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(factory());
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
-        return redisTemplate;
-    }
-
-    @Bean
-    ChannelTopic topic() {
-        return new ChannelTopic("message");
-    }
+    // Pub & Sub을 처리하는 Listener    @Bean  
+    public RedisMessageListenerContainer listenerContainer() {  
+        RedisMessageListenerContainer container = new RedisMessageListenerContainer();  
+        container.setConnectionFactory(factory());  
+        return container;  
+    }  
+  
+    // 어플리케이션에서 사용할 Redis Template    @Bean  
+    public RedisTemplate<String, Object> template() {  
+        RedisTemplate<String, Object> template = new RedisTemplate<>();  
+        template.setConnectionFactory(factory());  
+        template.setKeySerializer(new StringRedisSerializer());  
+        template.setValueSerializer(new Jackson2JsonRedisSerializer<>(String.class));  
+        return template;  
+    }  
+  
+    @Bean  
+    ChannelTopic topic() {  
+        return new ChannelTopic("message");  
+    }  
 }
 ```
 
@@ -272,40 +339,45 @@ public class RedisConfig {
 
 위 Redis Config의 MessageListenerAdapter에 추가되는 Listener 클래스 입니다.
 
+`receive()` 함수는 메시지를 발행하는 역할입니다.
+
 Redis Template를 이용해 들어온 메시지를 변환하여 수신합니다.
 
 ```java
-@Slf4j
-@Service
-@RequiredArgsConstructor
-public class RedisMessageReceiver {
-
-    private final RedisTemplate<String, Object> template;
-
-    public void receive(String message) {
-        template.convertAndSend("channel", message);
-    }
+@Slf4j  
+@Service  
+@RequiredArgsConstructor  
+public class RedisMessageReceiver {  
+  
+    private final RedisTemplate<String, Object> template;  
+  
+    public void receive(String message) {  
+        template.convertAndSend("channel", message);  
+    }  
 }
 ```
+
+<br>
 
 > 📕 **RedisSubscriber**
 
 - Redis로부터 온 메시지를 역직렬화하여 메시지를 Topic 명과 함께 전달합니다.
+- `onMessage()` 함수는 메시지를 구독 및 전달하는 함수입니다.
 
 ```java
-@Service
-@RequiredArgsConstructor
-public class RedisSubscriber implements MessageListener {
-
-    private final RedisTemplate<String, Object> template;
-
+@Service  
+@RequiredArgsConstructor  
+public class RedisSubscriber implements MessageListener {  
+  
+    private final RedisTemplate<String, Object> template;  
+  
     // Redis로부터 온 메시지를 역직렬화 하여 메시지 전달  
-    @Override
-    public void onMessage(Message message) {
-        String publishMessage = template.getStringSerializer().deserialize(message.getBody());
-        assert publishMessage != null;
-        template.convertAndSend("/topic/message", publishMessage);
-    }
+    @Override  
+    public void onMessage(Message message) {  
+        String publishMessage = template.getStringSerializer().deserialize(message.getBody());  
+        assert publishMessage != null;  
+        template.convertAndSend("/topic/message", publishMessage);  
+    }  
 }
 ```
 
@@ -321,9 +393,28 @@ public class RedisSubscriber implements MessageListener {
 
 <br>
 
+😯 **RabbitMQ 서버**
+
+백엔드 서버를 실행시키고 채널이 오픈되며 잠잠하던 그래프에 변동이 생겼습니다.
+
+![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/channel.png)
+
+<br>
+
+😯 **Spring Log**
+
 아래 사진은 백엔드 서버를 키고 딥러닝 엔진 돌려서 RabbitMQ에 있는 데이터를 Spring Redis가 가져와서 스프링 로그를 찍은 사진입니다.
 
+- RabbitMQ 서버의 amqp 포트인 5672와 guest 계정으로 잘 데이터를 받아왔으며,
+- 프론트엔드와 소켓이 Connect된 것을 확인할 수 있습니다.
+
+![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/connected.png)
+
+<br>
+
 ![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/redis.png)
+
+이제 프론트엔드에서 Redis Channel을 Subscribe 해새 데이터를 소켓을 이용해 넘겨보겠습니다.
 
 ---
 
@@ -339,109 +430,125 @@ Broker URL을 위에 나온 것처럼 `ws://localhost:18080/ws`로 설정해주�
 
 Subscribe Topic은 `/topic/message`를 주었습니다.
 
-<br>
-
-Stomp Client Header에 `x-queue-type`, `x-message-ttl`, `autoConfirm` 옵션을 준 이유는,
-
-RabbitMQ의 쿼럼 큐는 메시지를 받고 ACK를 보내야 하는데 임시로 전부 ACK를 날리게 헤더에 설정했고,
-
-Message-TTL과 Message-Type은 쿼럼 큐의 Arguments와 맟춰준 것이며, 안맟춰주면 소켓이 안열리게 됩니다.
-
 ```tsx
-import React, { useEffect, useState } from 'react';
-import {Client, StompHeaders} from '@stomp/stompjs';
-
-interface RedisState {
-    messages: string[];
-    subscribed: boolean;
-    client: Client;
-}
-
-const RedisSocketSubscriber: React.FC<RedisState> = () => {
-    const [messages, setMessages] = useState<string[]>([]);
-    const [subscribed, setSubscribed] = useState(false);
-    const [client, setClient] = useState<Client>();
-
+import React, { useEffect, useState } from 'react';  
+import {Client} from '@stomp/stompjs';  
+  
+interface RedisState {  
+    messages: string[];  
+    subscribed: boolean;  
+    client: Client;  
+}  
+  
+const RedisSocketSubscriber: React.FC<RedisState> = () => {  
+    const [messages, setMessages] = useState<string[]>([]);  
+    const [subscribed, setSubscribed] = useState(false);  
+    const [client, setClient] = useState<Client>();  
+  
     // Life Cycle Hooks  
-    useEffect(() => {
-        subscribeToRedis();
-        return () => {
-            unSubscribeFromRedis();
-        };
-    }, []);
-
+    useEffect(() => {  
+        subscribeToRedis();  
+        return () => {  
+            unSubscribeFromRedis();  
+        };  
+    }, []);  
+  
     // 구독 함수  
-    const subscribeToRedis = () => {
-        const client = new Client({
-            brokerURL: 'ws://localhost:18080/ws',
-
-            debug: (str: string) => {
-                console.log(str);
-            },
-        });
-
+    const subscribeToRedis = () => {  
+        const client = new Client({  
+            brokerURL: 'ws://localhost:18080/ws',  
+  
+            debug: (str: string) => {  
+                console.log(str);  
+            },  
+        });  
+  
         // Stomp Client Header - AutoConfirm, Message TTL 옵션 추가  
-        const connectHeadersWithAutoConfirm: StompHeaders = {
-            ...client.connectHeaders,
-            'x-queue-type': 'quorum',
-            'x-message-ttl': 200000,
-            autoConfirm: true,
-        };
-
-        // Quorum Queue Subscribe  
-        client.onConnect = () => {
-            console.log('Socket Connected');
-
+        // const connectHeadersWithAutoConfirm: StompHeaders = {  
+        //     ...client.connectHeaders,        //     'x-queue-type': 'quorum',        //     'x-message-ttl': 200000,        //     autoConfirm: true,        // };  
+        // Quorum Queue Subscribe        client.onConnect = () => {  
+            console.log('Socket Connected');  
+  
             // 1번째 파라미터로 Queue 이름, 2번째는 콜백 함수  
-            client.subscribe('/topic/message', (frame) => {
-                    const newMessage = `Test - Redis: ${frame.body}`;
-                    setMessages((prevMessages) => [...prevMessages, newMessage]);
-                },
-                {
-                    id: 'Test-Subscribe',
-                    ...connectHeadersWithAutoConfirm,
-                });
-            setSubscribed(true);
-        };
-
+            client.subscribe('/topic/message', (frame) => {  
+                    const newMessage = `Test - Redis: ${frame.body}`;  
+                    setMessages((prevMessages) => [...prevMessages, newMessage]);  
+                },  
+                {  
+                    id: 'Test-Subscribe',  
+                    // ...connectHeadersWithAutoConfirm,  
+                });  
+            setSubscribed(true);  
+        };  
+  
         // 오류 메시지의 세부 정보 출력  
-        client.onStompError = (frame) => {
-            console.error('STOMP error', frame.headers['message']);
-            console.log('Error Details:', frame.body);
-        };
-
-        setClient(client);
-        client.activate();
-    };
-
+        client.onStompError = (frame) => {  
+            console.error('STOMP error', frame.headers['message']);  
+            console.log('Error Details:', frame.body);  
+        };  
+  
+        setClient(client);  
+        client.activate();  
+    };  
+  
     // 구독 해제 함수, 버튼을 클릭하면 구독을 해제함  
-    const unSubscribeFromRedis = () => {
-        if (client) {
-            client.unsubscribe('Test-Subscribe');
-            setClient(null);
-            setSubscribed(false);
-        }
-    };
-
-    return (
-        <div>
-            <h2>Redis Subscriber</h2>
-            <ul>
-                {messages.map((message, index) => (
-                    <li key={index}>
-                        <p>{message}</p>
-                    </li>
-                ))}
-            </ul>
-            {!subscribed ? (
-                <button onClick={subscribeToRedis}>Subscribe</button>
-            ) : (
+    const unSubscribeFromRedis = () => {  
+        if (client) {  
+            client.unsubscribe('Test-Subscribe');  
+            setClient(null);  
+            setSubscribed(false);  
+        }  
+    };  
+  
+    return (  
+        <div>  
+            <h2>Redis Listener</h2>  
+            <ul>  
+                {messages.map((message, index) => (  
+                    <li key={index}>  
+                        <p>{message}</p>  
+                    </li>  
+                ))}  
+            </ul>  
+            {!subscribed ? (  
+                <button onClick={subscribeToRedis}>Subscribe</button>  
+            ) : (  
                 // 구독 중일 때 해지 버튼  
-                <button onClick={unSubscribeFromRedis}>Unsubscribe</button>
-            )}
-        </div>
-    );
-};
-
+                <button onClick={unSubscribeFromRedis}>Unsubscribe</button>  
+            )}  
+        </div>  
+    );  
+};  
+  
 export default RedisSocketSubscriber;
 ```
+
+~~Stomp Client Header에 `x-queue-type`, `x-message-ttl`, `autoConfirm` 옵션을 준 이유는,
+
+~~RabbitMQ의 쿼럼 큐는 메시지를 받고 ACK를 보내야 하는데 임시로 전부 ACK를 날리게 헤더에 설정했고,
+
+~~Message-TTL과 Message-Type은 쿼럼 큐의 Arguments와 맟춰준 것이며, 안맟춰주면 소켓이 안열리게 됩니다.
+
+현재 Header 옵션을 주면 에러가 나긴 하지만 헤더를 비우면 일단 잘 데이터를 잘 받아오긴 합니다.
+
+헤더 로직 수정 후 내용 수정하겠습니다.
+
+<br>
+
+> 📕 **실행 결과**
+
+😯 **Web Socket Connected / Topic Subscription 성공**
+
+아래 사진을 보시면 소켓이 연결되고 구독 URL인 `/topic/message`를 구독해서 Message Sucscribe가 잘 된걸 볼 수 있습니다.
+
+![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/connect2.png)
+
+<br>
+
+😯 **끝**
+
+Rabbit -> Redis -> Spring Data Redis(Socket) ->  Frontend(Socket) 으로 Redis Pub/Sub을 이용해 데이터 전달에 성공했습니다!!
+
+이제 중간에 Spring Data Redis에서 받은 데이터 중 원하는 데이터 필드만 뽑아 엔티티화 해서 MariaDB 저장 후 프론트로 넘기면 되는데 이건 생략하겠습니다.
+
+![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/done.png)
