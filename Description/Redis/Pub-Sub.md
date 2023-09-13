@@ -385,21 +385,15 @@ public class RedisSubscriber implements MessageListener {
 
 > 📕 **실행 결과**
 
-- 딥러닝 엔진에서 MQTT 데이터 전송
-- RabbitMQ의 Exchange -> Routing Key -> Quorum Queue에 메시지 쌓임
-- Spring Redis에서 RabbitMQ의 Queue에서 데이터를 Redis로 가져옵니다.
-- Spring Redis(Backend)에서 소켓을 열어줍니다.
-- 소켓의 URL은 `WebSocketConfig` 클래스에 나온것처럼 `ws://localhost:18080/ws`입니다.
-
-<br>
-
 😯 **RabbitMQ 서버**
 
-백엔드 서버를 실행시키고 채널이 오픈되며 잠잠하던 그래프에 변동이 생겼습니다.
+딥러닝 엔진과 백엔드 서버를 실행시키고 채널이 오픈 되며 잠잠하던 그래프에 변동이 생겼습니다.
+
+Exchange를 거쳐 맞는 Routing Key를 가진 Quorum Queue에 MQTT 데이터가 쌓입니다.
 
 ![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/channel.png)
 
-<br>
+<br><br>
 
 😯 **Spring Log**
 
@@ -463,20 +457,15 @@ const RedisSocketSubscriber: React.FC<RedisState> = () => {
             },  
         });  
   
-        // Stomp Client Header - AutoConfirm, Message TTL 옵션 추가  
-        // const connectHeadersWithAutoConfirm: StompHeaders = {  
-        //     ...client.connectHeaders,        //     'x-queue-type': 'quorum',        //     'x-message-ttl': 200000,        //     autoConfirm: true,        // };  
-        // Quorum Queue Subscribe        client.onConnect = () => {  
             console.log('Socket Connected');  
   
-            // 1번째 파라미터로 Queue 이름, 2번째는 콜백 함수  
+            // 1번째 파라미터로 Redis Subscribe명, 2번째는 콜백 함수  
             client.subscribe('/topic/message', (frame) => {  
                     const newMessage = `Test - Redis: ${frame.body}`;  
                     setMessages((prevMessages) => [...prevMessages, newMessage]);  
                 },  
                 {  
                     id: 'Test-Subscribe',  
-                    // ...connectHeadersWithAutoConfirm,  
                 });  
             setSubscribed(true);  
         };  
@@ -523,15 +512,21 @@ const RedisSocketSubscriber: React.FC<RedisState> = () => {
 export default RedisSocketSubscriber;
 ```
 
-~~Stomp Client Header에 `x-queue-type`, `x-message-ttl`, `autoConfirm` 옵션을 준 이유는,
+~~Stomp Client Header에 `x-queue-type`, `x-message-ttl`, `autoConfirm` 옵션을 준 이유는,~~
 
-~~RabbitMQ의 쿼럼 큐는 메시지를 받고 ACK를 보내야 하는데 임시로 전부 ACK를 날리게 헤더에 설정했고,
+~~RabbitMQ의 쿼럼 큐는 메시지를 받고 ACK를 보내야 하는데 임시로 전부 ACK를 날리게 헤더에 설정했고,~~
 
-~~Message-TTL과 Message-Type은 쿼럼 큐의 Arguments와 맟춰준 것이며, 안맟춰주면 소켓이 안열리게 됩니다.
+~~Message-TTL과 Message-Type은 쿼럼 큐의 Arguments와 맟춰준 것이며, 안맟춰주면 소켓이 안열리게 됩니다.~~
 
-현재 Header 옵션을 주면 에러가 나긴 하지만 헤더를 비우면 일단 잘 데이터를 잘 받아오긴 합니다.
+~~현재 Header 옵션을 주면 에러가 나긴 하지만 헤더를 비우면 일단 잘 데이터를 잘 받아오긴 합니다.~~
 
-헤더 로직 수정 후 내용 수정하겠습니다.
+~~헤더 로직 수정 후 내용 수정하겠습니다.~~
+
+<br>
+
+STOMP Header 옵션을 설정 안해줘도 Quorum Queue의 헤더 옵션이 잘 들어가는 것을 확인했습니다.
+
+위 코드 그대로 사용하면 됩니다.
 
 <br>
 
@@ -549,6 +544,6 @@ export default RedisSocketSubscriber;
 
 Rabbit -> Redis -> Spring Data Redis(Socket) ->  Frontend(Socket) 으로 Redis Pub/Sub을 이용해 데이터 전달에 성공했습니다!!
 
-이제 중간에 Spring Data Redis에서 받은 데이터 중 원하는 데이터 필드만 뽑아 엔티티화 해서 MariaDB 저장 후 프론트로 넘기면 되는데 이건 생략하겠습니다.
+이제 중간에 Spring Data Redis에서 받은 데이터 중 원하는 데이터 필드만 뽑아 엔티티화 해서 MariaDB 저장 후 프론트로 넘기면 되는데 이건 생략 하겠습니다.
 
 ![img](https://raw.githubusercontent.com/spacedustz/Obsidian-Image-Server/main/img2/done.png)

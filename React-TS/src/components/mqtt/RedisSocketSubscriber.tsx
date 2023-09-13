@@ -30,26 +30,16 @@ const RedisSocketSubscriber: React.FC<RedisState> = () => {
             },
         });
 
-        // Stomp Client Header - AutoConfirm, Message TTL 옵션 추가
-        // const connectHeadersWithAutoConfirm: StompHeaders = {
-        //     ...client.connectHeaders,
-        //     'x-queue-type': 'quorum',
-        //     'x-message-ttl': 200000,
-        //     autoConfirm: true,
-        // };
-
-        // Quorum Queue Subscribe
         client.onConnect = () => {
             console.log('Socket Connected');
 
-            // 1번째 파라미터로 Queue 이름, 2번째는 콜백 함수
+            // 1번째 파라미터로 Redis Subscribe명, 2번째는 콜백 함수
             client.subscribe('/topic/message', (frame) => {
                     const newMessage = `Test - Redis: ${frame.body}`;
                     setMessages((prevMessages) => [...prevMessages, newMessage]);
                 },
                 {
                     id: 'Test-Subscribe',
-                    // ...connectHeadersWithAutoConfirm,
                 });
             setSubscribed(true);
         };
