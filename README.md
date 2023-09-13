@@ -23,8 +23,9 @@ A repository for All Types of Implementation Tests
 - Spring Batch
 - Spring Data JPA
 - Maria DB
-- Rabbit MQ (MQTT Broket) Pub/Sub
-- Web Socket
+- Rabbit MQ (MQTT Broker)
+- Redis Pub/Sub Pattern
+- Web Socket (Stomp)
 - QueryDSL
 - MQTT, RTSP, HLS, FFmpeg
 - Akka Actor (Scala)
@@ -139,7 +140,7 @@ A repository for All Types of Implementation Tests
 - WIndows 서버에 있는 4대의 RabbitMQ + 관리서버(Linux) +1로 클러스터링
 - WIndows 서버의 Rabbit은 각각 다른 Exchange/Queue (Master Queue)를 가진다
 - Linux 서버의 RabbitMQ는 Windows Rabbit의 각 Queue의 Mirroring인 Slave Queue를 둔다.
-- Linux 서버의 Backend 에서 Slave Queue들을 Subscribe하고 데이터를 필요에 따라 변환, DB에 저장 한다.
+- Linux 서버의 Backend (Spring Data Redis) 에서 Slave Queue들을 Subscribe하고 데이터를 필요에 따라 변환, Maria DB에 저장 한다.
 - Frontend에서 Backend의 소켓에 접속해 변환된 MQTT, Json, CSV데이터를 차트에 뿌려 차트를 변화시킨다.
 
 <br>
