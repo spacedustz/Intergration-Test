@@ -52,16 +52,6 @@ public class RedisConfig {
         return template;
     }
 
-    // 토큰 저장소로 사용할 Redis Template
-    @Bean
-    public RedisTemplate<?, ?> tokenRedisTemplate() {
-        RedisTemplate<String, String> redisTemplate = new RedisTemplate<>();
-        redisTemplate.setConnectionFactory(factory());
-        redisTemplate.setKeySerializer(new StringRedisSerializer());
-        redisTemplate.setValueSerializer(new StringRedisSerializer());
-        return redisTemplate;
-    }
-
     @Bean
     ChannelTopic topic() {
         return new ChannelTopic("message");
