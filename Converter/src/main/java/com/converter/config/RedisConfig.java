@@ -23,12 +23,12 @@ public class RedisConfig {
     private int port;
 
     // Redis 연결 설정
-    @Bean
+    @Bean(name = "redisFactory")
     public RedisConnectionFactory factory() {
         return new LettuceConnectionFactory(host, port);
     }
 
-    @Bean
+    @Bean(name = "redisListener")
     public MessageListenerAdapter listener(RedisSubscriber subscriber) {
         return new MessageListenerAdapter(subscriber, "onMessage");
     }
@@ -43,7 +43,7 @@ public class RedisConfig {
     }
 
     // 어플리케이션에서 사용할 Redis Template
-    @Bean
+    @Bean(name = "redisTemplate")
     public RedisTemplate<String, Object> template() {
         RedisTemplate<String, Object> template = new RedisTemplate<>();
         template.setConnectionFactory(factory());
