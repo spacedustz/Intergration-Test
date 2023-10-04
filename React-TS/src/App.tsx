@@ -12,6 +12,7 @@ import styled, {css} from "styled-components";
 import Button from "./components/style/GlobalStyledBotton";
 import RabbitMqWebSocketHandler from "./components/mqtt/RabbitMqWebSocketHandler";
 import RedisSocketSubscriber from "./components/mqtt/RedisSocketSubscriber";
+import KakaoMap from "./components/kakao/KakaoMap";
 
 interface CircleProps {
     color?: string;
@@ -92,6 +93,9 @@ const App: React.FC = () => {
                 <AppBlock>
                     {/*<RabbitMqWebSocketHandler />*/}
                     <RedisSocketSubscriber />
+                </AppBlock>
+                <AppBlock>
+                    <KakaoMap />
                 </AppBlock>
             </div>
         </ContextProvider>
