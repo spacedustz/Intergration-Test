@@ -24,11 +24,11 @@ spring:
         format_sql: true
 
   # RabbitMQ 설정
-#  rabbitmq:
-#    host: localhost
-#    port: 5672
-#    username: guest
-#    password: guest
+  rabbitmq:
+    host: localhost
+    port: 5672
+    username: guest
+    password: guest
 #    template:
 #      exchange: xx.frame
 #      default-receive-queue: qq.frame
