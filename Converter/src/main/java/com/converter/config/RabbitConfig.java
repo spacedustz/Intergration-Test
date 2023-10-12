@@ -1,9 +1,9 @@
 package com.converter.config;
 
-import com.rabbitmq.client.ConnectionFactory;
 import org.springframework.amqp.core.*;
 import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
+import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
@@ -73,23 +73,23 @@ public class RabbitConfig {
         factory.setUsername(id);
         factory.setPassword(pw);
 
-        return factory.getRabbitConnectionFactory();
+        return factory;
     }
 
     // Rabbit Template 생성
     @Bean
-    RabbitTemplate template(org.springframework.amqp.rabbit.connection.ConnectionFactory factory, MessageConverter converter) {
-        RabbitTemplate template = new RabbitTemplate(factory);
-        template.setMessageConverter(converter);
+    RabbitTemplate template() {
+        RabbitTemplate template = new RabbitTemplate(factory());
+        template.setMessageConverter(converter());
 
         return template;
     }
 
     // Subscribe Listener
     @Bean
-    SimpleRabbitListenerContainerFactory listener(org.springframework.amqp.rabbit.connection.ConnectionFactory connectionFactory) {
+    SimpleRabbitListenerContainerFactory listener() {
         final SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
-        factory.setConnectionFactory(connectionFactory);
+        factory.setConnectionFactory(factory());
         factory.setMessageConverter(converter());
         factory.setAcknowledgeMode(AcknowledgeMode.AUTO);
 
